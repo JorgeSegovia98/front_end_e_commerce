@@ -1,18 +1,19 @@
-import React from "react";
+import React from 'react';
 
-export function Input({ label, type, name, placeholder }) {
+export const Input = ({ label, type, name, placeholder, value, onChange }) => {
   return (
-    <div>
-      <label htmlFor={name} className="block text-sm font-medium text-gray-700">
+    <div className="space-y-2">
+      <label className="block text-sm font-medium text-gray-700">
         {label}
       </label>
       <input
-        id={name}
         type={type}
         name={name}
         placeholder={placeholder}
-        className="mt-1 block w-full px-3 py-2 border rounded-lg shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 border-gray-300"
+        value={value}
+        onChange={onChange}
+        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-500"
       />
     </div>
   );
-}
+};

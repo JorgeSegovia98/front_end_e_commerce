@@ -1,13 +1,9 @@
-import React from "react";
+import React from 'react';
 
-export function Logo() {
+export const Logo = () => {
   return (
-    <div className="flex justify-center mb-6">
-      <img
-        src="/logo.png"
-        alt="Logo"
-        className="h-16 w-16 rounded-full shadow-md"
-      />
+    <div className="flex justify-center">
+      <span className="text-3xl font-bold text-indigo-600">Logo</span>
     </div>
   );
-}
+};
