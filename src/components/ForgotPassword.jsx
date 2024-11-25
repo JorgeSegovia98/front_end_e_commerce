@@ -6,7 +6,7 @@ import { Button } from "./Button";
 
 export default function ForgotPassword() {
   return (
-    <div className="flex h-screen items-center justify-center bg-gradient-to-r from-blue-400 via-purple-500 to-indigo-600">
+    <div className="flex w-screen h-screen items-center justify-center bg-gradient-to-r from-blue-400 via-purple-500 to-indigo-600 fixed">
       <div className="w-full max-w-md p-8 space-y-6 bg-white rounded-lg shadow-lg">
         <Logo />
         <h1 className="text-2xl font-bold text-gray-800 text-center">Recuperar Contraseña</h1>

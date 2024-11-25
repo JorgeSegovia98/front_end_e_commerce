@@ -6,7 +6,7 @@ import { Button } from "./Button";
 
 export default function RegisterPage() {
   return (
-    <div className="flex h-screen items-center justify-center bg-gradient-to-r from-green-400 via-teal-500 to-blue-600">
+    <div className="flex w-screen h-screen items-center justify-center bg-gradient-to-r from-green-400 via-teal-500 to-blue-600 fixed">
       <div className="w-full max-w-md p-8 space-y-6 bg-white rounded-lg shadow-lg">
         <Logo />
         <h1 className="text-2xl font-bold text-gray-800 text-center">Crea una cuenta</h1>
