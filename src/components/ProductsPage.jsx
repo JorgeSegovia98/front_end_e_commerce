@@ -12,6 +12,7 @@ const ProductsPage = () => {
   const productsPerPage = 8;
 
   useEffect(() => {
+    // Combine mock products with products from localStorage
     const mockProducts = [
       {
         id: 1,
@@ -79,7 +80,16 @@ const ProductsPage = () => {
       },
     ];
 
-    setProducts(mockProducts);
+    // Retrieve products from localStorage
+    const storedProducts = JSON.parse(localStorage.getItem('products')) || [];
+    
+    // Combine mock products with stored products, ensuring no duplicates
+    const combinedProducts = [
+      ...mockProducts,
+      ...storedProducts.filter(sp => !mockProducts.some(mp => mp.id === sp.id))
+    ];
+
+    setProducts(combinedProducts);
   }, []);
 
   // Sorting function
@@ -118,6 +128,15 @@ const ProductsPage = () => {
     navigate('/sell-product');
   };
 
+  const handleMyProducts = () => {
+    navigate('/my-products');
+  };
+
+  const handleSearch = () => {
+    // Reset to first page when searching
+    setCurrentPage(1);
+  };
+
   return (
     <div className="min-h-screen bg-gray-100">
       {/* Navbar */}
@@ -135,6 +154,12 @@ const ProductsPage = () => {
               onClick={handleSellProduct}
             >
               Vender un producto
+            </button>
+            <button 
+              className="bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600"
+              onClick={handleMyProducts}
+            >
+              Ver mis productos
             </button>
           </div>
           <div className="flex items-center gap-4">
@@ -156,7 +181,10 @@ const ProductsPage = () => {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
-            <button className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700">
+            <button 
+              className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700"
+              onClick={handleSearch}
+            >
               Buscar
             </button>
           </div>
@@ -165,19 +193,27 @@ const ProductsPage = () => {
 
       {/* Productos */}
       <div className="container mx-auto px-4 py-16">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {currentProducts.map((product) => (
-            <ProductCard key={product.id} product={product} />
-          ))}
-        </div>
+        {filteredAndSortedProducts.length === 0 ? (
+          <div className="text-center text-gray-600 text-xl">
+            No se encontraron productos
+          </div>
+        ) : (
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {currentProducts.map((product) => (
+                <ProductCard key={product.id} product={product} />
+              ))}
+            </div>
 
-        {/* Paginación */}
-        <Pagination
-          currentPage={currentPage}
-          productsPerPage={productsPerPage}
-          totalProducts={filteredAndSortedProducts.length}
-          paginate={paginate}
-        />
+            {/* Paginación */}
+            <Pagination
+              currentPage={currentPage}
+              productsPerPage={productsPerPage}
+              totalProducts={filteredAndSortedProducts.length}
+              paginate={paginate}
+            />
+          </>
+        )}
       </div>
     </div>
   );

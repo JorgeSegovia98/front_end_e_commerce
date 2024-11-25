@@ -11,6 +11,7 @@ import RegisterPage from "../components/RegisterPage";
 import ForgotPassword from "../components/ForgotPassword";
 import ProductsPage from "../components/ProductsPage";
 import { SellProduct } from "../components/SellProduct";
+import { MyProductsPage } from "../components/MyProductsPage";
 
 export default function AppRoutes() {
   return (
@@ -26,6 +27,7 @@ export default function AppRoutes() {
           <Route path="/cart" element={<Cart />} />
           <Route path="/payment" element={<Payment />} />
           <Route path="/sell-product" element={<SellProduct />} />
+          <Route path="/my-products" element={<MyProductsPage />} />
         </Routes>
       </CartProvider>
     </Router>
