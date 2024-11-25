@@ -8,7 +8,6 @@ export const ProductDetail = () => {
   const navigate = useNavigate();
   const [product, setProduct] = useState(null);
   const { addToCart } = useCart();
-  const [search, setSearch] = useState('');
 
   useEffect(() => {
     // Lógica para obtener el producto (mock mientras no hay API)
@@ -25,7 +24,6 @@ export const ProductDetail = () => {
   }, [id]);
 
   const handleAddToCart = () => {
-    
     // Obtiene el carrito actual del localStorage
     const cart = JSON.parse(localStorage.getItem('cartItems')) || [];
     
@@ -46,7 +44,10 @@ export const ProductDetail = () => {
     // Opcional: redirigir al carrito después de agregar el producto
     navigate('/cart');
   };
-  
+
+  const handleTitleClick = () => {
+    navigate('/products-page');
+  };
 
   if (!product) {
     return (
@@ -61,25 +62,20 @@ export const ProductDetail = () => {
       {/* Navbar */}
       <nav className="bg-white shadow mb-8">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-          <h1 className="text-2xl font-bold text-blue-600">Tienda Virtual</h1>
           <div className="flex items-center gap-4">
-            {/* Filtros */}
-            <select className="border border-gray-300 rounded px-4 py-2">
-              <option value="all">Todos</option>
-              <option value="price-asc">Precio: Menor a Mayor</option>
-              <option value="price-desc">Precio: Mayor a Menor</option>
-            </select>
-            {/* Barra de búsqueda */}
-            <input
-              type="text"
-              placeholder="Buscar productos..."
-              className="border border-gray-300 rounded px-4 py-2 w-64"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
-            <button className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700">
-              Buscar
-            </button>
+            <h1 
+              className="text-2xl font-bold text-blue-600 cursor-pointer"
+              onClick={handleTitleClick}
+            >
+              Tienda Virtual
+            </h1>
+          </div>
+          <div className="flex items-center gap-4">
+            <div 
+              className="text-green-600 font-semibold flex items-center"
+            >
+              ¿Todo listo? Ir al carrito
+            </div>
           </div>
         </div>
       </nav>

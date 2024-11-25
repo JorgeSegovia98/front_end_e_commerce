@@ -10,6 +10,7 @@ import { Payment } from "../components/Payment";
 import RegisterPage from "../components/RegisterPage";
 import ForgotPassword from "../components/ForgotPassword";
 import ProductsPage from "../components/ProductsPage";
+import { SellProduct } from "../components/SellProduct";
 
 export default function AppRoutes() {
   return (
@@ -24,6 +25,7 @@ export default function AppRoutes() {
           <Route path="/product/:id" element={<ProductDetail />} />
           <Route path="/cart" element={<Cart />} />
           <Route path="/payment" element={<Payment />} />
+          <Route path="/sell-product" element={<SellProduct />} />
         </Routes>
       </CartProvider>
     </Router>

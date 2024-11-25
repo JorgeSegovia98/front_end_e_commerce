@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { ProductCard } from './ProductCard';
 import { Pagination } from './Pagination';
 
@@ -6,7 +7,9 @@ const ProductsPage = () => {
   const [products, setProducts] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [search, setSearch] = useState('');
-  const productsPerPage = 8; // Adaptado a 4 productos por fila
+  const [sortOption, setSortOption] = useState('all');
+  const navigate = useNavigate();
+  const productsPerPage = 8;
 
   useEffect(() => {
     const mockProducts = [
@@ -79,25 +82,68 @@ const ProductsPage = () => {
     setProducts(mockProducts);
   }, []);
 
-  const indexOfLastProduct = currentPage * productsPerPage;
-  const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
-  const currentProducts = products
-    .filter((product) =>
+  // Sorting function
+  const sortProducts = (productsToSort) => {
+    switch(sortOption) {
+      case 'price-asc':
+        return [...productsToSort].sort((a, b) => a.price - b.price);
+      case 'price-desc':
+        return [...productsToSort].sort((a, b) => b.price - a.price);
+      default:
+        return productsToSort;
+    }
+  };
+
+  // Filtered and sorted products
+  const filteredAndSortedProducts = sortProducts(
+    products.filter((product) =>
       product.title.toLowerCase().includes(search.toLowerCase())
     )
-    .slice(indexOfFirstProduct, indexOfLastProduct);
+  );
+
+  const indexOfLastProduct = currentPage * productsPerPage;
+  const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
+  const currentProducts = filteredAndSortedProducts.slice(
+    indexOfFirstProduct, 
+    indexOfLastProduct
+  );
 
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
+
+  const handleTitleClick = () => {
+    navigate('/products-page');
+  };
+
+  const handleSellProduct = () => {
+    navigate('/sell-product');
+  };
 
   return (
     <div className="min-h-screen bg-gray-100">
       {/* Navbar */}
       <nav className="bg-white shadow mb-8">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-          <h1 className="text-2xl font-bold text-blue-600">Tienda Virtual</h1>
+          <div className="flex items-center gap-4">
+            <h1 
+              className="text-2xl font-bold text-blue-600 cursor-pointer"
+              onClick={handleTitleClick}
+            >
+              Tienda Virtual
+            </h1>
+            <button 
+              className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
+              onClick={handleSellProduct}
+            >
+              Vender un producto
+            </button>
+          </div>
           <div className="flex items-center gap-4">
             {/* Filtros */}
-            <select className="border border-gray-300 rounded px-4 py-2">
+            <select 
+              className="border border-gray-300 rounded px-4 py-2"
+              value={sortOption}
+              onChange={(e) => setSortOption(e.target.value)}
+            >
               <option value="all">Todos</option>
               <option value="price-asc">Precio: Menor a Mayor</option>
               <option value="price-desc">Precio: Mayor a Menor</option>
@@ -129,7 +175,7 @@ const ProductsPage = () => {
         <Pagination
           currentPage={currentPage}
           productsPerPage={productsPerPage}
-          totalProducts={products.length}
+          totalProducts={filteredAndSortedProducts.length}
           paginate={paginate}
         />
       </div>
