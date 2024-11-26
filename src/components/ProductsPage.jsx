@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ProductCard } from './ProductCard';
 import { Pagination } from './Pagination';
-import { getAllProducts } from 'services/ApiService';  // Asegúrate de importar la función correctamente
+import { getAllProducts } from 'services/ApiService';
+import { useCart } from './CartContext';
 
 const ProductsPage = () => {
   const [products, setProducts] = useState([]);
@@ -12,6 +13,7 @@ const ProductsPage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
   const navigate = useNavigate();
+  const { getCartCount } = useCart();
   const productsPerPage = 8;
 
   useEffect(() => {
@@ -19,20 +21,19 @@ const ProductsPage = () => {
       setIsLoading(true);
       try {
         const fetchedProducts = await getAllProducts();
-        console.log(fetchedProducts);
-
-        // Mapeamos los productos para ajustarlos a nuestro formato esperado
-        const mappedProducts = fetchedProducts._embedded.productos.map((product, index) => ({
-          id: index + 1, // Usamos el índice como ID temporal
+        const mappedProducts = fetchedProducts._embedded.productos.map((product) => ({
+          id: product.id, 
           title: product.nombre,
           price: product.precio,
           description: product.descripcion,
-          image: product.imagen || 'https://placehold.co/600x400',  // Imagen por defecto si no existe
+          image: product.imagen || 'https://placehold.co/600x400',
+          rating: 4
         }));
 
         setProducts(mappedProducts);
       } catch (error) {
         setError('Error al cargar los productos');
+        console.error(error);
       } finally {
         setIsLoading(false);
       }
@@ -165,7 +166,11 @@ const ProductsPage = () => {
           <>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               {currentProducts.map((product) => (
-                <ProductCard key={product.id} product={product} />
+                <ProductCard 
+                  key={product.id} 
+                  product={product} 
+                  onDetailsClick={() => navigate(`/product-detail/${product.id}`, { state: { product } })}
+                />
               ))}
             </div>
 

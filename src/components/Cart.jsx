@@ -1,35 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useCart } from './CartContext';
 
 export const Cart = () => {
   const navigate = useNavigate();
-  
-  // Estado para almacenar los productos del carrito
-  const [cartItems, setCartItems] = useState([]);
-  
-  // Cargar los productos del carrito desde localStorage
-  useEffect(() => {
-    const storedCartItems = JSON.parse(localStorage.getItem('cartItems')) || [];
-    setCartItems(storedCartItems);
-  }, []);
-
-  const getCartTotal = () => {
-    return cartItems.reduce((total, item) => total + (item.price * item.quantity), 0);
-  };
-
-  const removeFromCart = (id) => {
-    const updatedCart = cartItems.filter(item => item.id !== id);
-    setCartItems(updatedCart);
-    localStorage.setItem('cartItems', JSON.stringify(updatedCart));
-  };
-
-  const updateQuantity = (id, newQuantity) => {
-    const updatedCart = cartItems.map(item => 
-      item.id === id ? { ...item, quantity: parseInt(newQuantity) } : item
-    );
-    setCartItems(updatedCart);
-    localStorage.setItem('cartItems', JSON.stringify(updatedCart));
-  };
+  const { 
+    cartItems, 
+    removeFromCart, 
+    updateQuantity, 
+    getCartTotal 
+  } = useCart();
 
   const goToPayment = () => {
     navigate('/payment');
@@ -39,12 +19,12 @@ export const Cart = () => {
     return (
       <div className="container mx-auto px-4 py-8">
         <h1 className="text-2xl font-bold mb-6">Tu carrito está vacío</h1>
-        <a 
-          href="/products-page"
+        <button 
+          onClick={() => navigate('/products-page')}
           className="inline-block bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 text-center"
         >
           Seguir comprando
-        </a>
+        </button>
       </div>
     );
   }
@@ -76,13 +56,12 @@ export const Cart = () => {
                         <option key={num} value={num}>{num}</option>
                       ))}
                     </select>
-                    <a 
-                      href="#"
+                    <button 
                       className="text-red-500 hover:text-red-700"
                       onClick={() => removeFromCart(item.id)}
                     >
                       Eliminar
-                    </a>
+                    </button>
                   </div>
                 </div>
               </div>
@@ -103,13 +82,12 @@ export const Cart = () => {
                 <span>${getCartTotal().toFixed(2)}</span>
               </div>
             </div>
-            <a 
-              href="#"
-              className="inline-block bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700 text-center"
+            <button 
+              className="inline-block bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700 text-center w-full"
               onClick={goToPayment}
             >
               Continuar al pago
-            </a>
+            </button>
           </div>
         </div>
       </div>

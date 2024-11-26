@@ -1,14 +1,16 @@
 import React, { useState, useEffect } from 'react'; 
 import { useParams, useLocation, useNavigate } from 'react-router-dom';
+import { useCart } from './CartContext';
 
 export const ProductDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { state } = useLocation(); // Obtener los datos del estado enviado desde ProductCard
-  const [product, setProduct] = useState(state ? state.product : null); // Inicializar con los datos del estado o null
+  const { state } = useLocation();
+  const [product, setProduct] = useState(state ? state.product : null);
   const [search, setSearch] = useState('');
+  const { addToCart, getCartCount } = useCart();
 
-  // Cargar el producto si no se pasó desde la card
+  // Fetch product details if not passed from previous page
   useEffect(() => {
     if (!product) {
       const fetchProduct = async () => {
@@ -18,47 +20,36 @@ export const ProductDetail = () => {
             throw new Error('Error al obtener el producto');
           }
           const fetchedProduct = await response.json();
-          setProduct(fetchedProduct);
+          // Map the fetched product to match your expected format
+          const mappedProduct = {
+            id: fetchedProduct.id,
+            title: fetchedProduct.nombre,
+            price: fetchedProduct.precio,
+            description: fetchedProduct.descripcion,
+            image: fetchedProduct.imagen || 'https://placehold.co/600x400',
+            rating: 4 // You might want to add a rating field in your backend
+          };
+          setProduct(mappedProduct);
         } catch (error) {
           console.error(error);
+          navigate('/products-page');
         }
       };
 
       fetchProduct();
     }
-  }, [id, product]);
+  }, [id, product, navigate]);
 
   const handleAddToCart = () => {
-    console.log("handleAddToCart triggered");
-
     if (!product) {
       console.error('Producto no encontrado');
       return;
     }
 
-    // Obtener el carrito desde localStorage (si existe), o crear uno vacío si no existe
-    let cart = JSON.parse(localStorage.getItem('cartItems')) || [];
-    
-    console.log("Carrito actual:", cart);
+    // Add product to cart
+    addToCart(product);
 
-    // Verificar si el producto ya está en el carrito
-    const existingProductIndex = cart.findIndex((item) => item.id === product.id);
-
-    if (existingProductIndex !== -1) {
-      // Si el producto ya está en el carrito, incrementamos la cantidad
-      cart[existingProductIndex].quantity += 1;
-      console.log('Producto actualizado en el carrito:', cart[existingProductIndex]);
-    } else {
-      // Si el producto no está en el carrito, lo agregamos con una cantidad de 1
-      cart.push({ ...product, quantity: 1 });
-      console.log('Producto agregado al carrito:', product);
-    }
-
-    // Guardar el carrito actualizado en localStorage
-    localStorage.setItem('cartItems', JSON.stringify(cart));
-    console.log('Carrito actualizado en localStorage:', cart);
-
-    // Redirigir al carrito
+    // Navigate to cart
     navigate('/cart');
   };
 
@@ -75,15 +66,21 @@ export const ProductDetail = () => {
       {/* Navbar */}
       <nav className="bg-white shadow mb-8">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-          <h1 className="text-2xl font-bold text-blue-600">Tienda Virtual</h1>
           <div className="flex items-center gap-4">
-            {/* Filtros */}
-            <select className="border border-gray-300 rounded px-4 py-2">
-              <option value="all">Todos</option>
-              <option value="price-asc">Precio: Menor a Mayor</option>
-              <option value="price-desc">Precio: Mayor a Menor</option>
-            </select>
-            {/* Barra de búsqueda */}
+            <h1 
+              className="text-2xl font-bold text-blue-600 cursor-pointer"
+              onClick={() => navigate('/products-page')}
+            >
+              Tienda Virtual
+            </h1>
+            <button 
+              className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+              onClick={() => navigate('/cart')}
+            >
+              Carrito ({getCartCount()})
+            </button>
+          </div>
+          <div className="flex items-center gap-4">
             <input
               type="text"
               placeholder="Buscar productos..."
@@ -91,17 +88,17 @@ export const ProductDetail = () => {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
-            <a
-              href="#"
+            <button 
               className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700"
+              onClick={() => navigate('/products-page')}
             >
               Buscar
-            </a>
+            </button>
           </div>
         </div>
       </nav>
 
-      {/* Detalle del Producto */}
+      {/* Product Detail */}
       <div className="container mx-auto px-4 py-8">
         <div className="flex flex-col md:flex-row gap-8">
           <div className="w-full md:w-2/3">
@@ -120,17 +117,16 @@ export const ProductDetail = () => {
               </div>
               <span className="text-gray-600">({product.rating} reviews)</span>
             </div>
-            <p className="text-2xl font-bold text-indigo-600">${product.price}</p>
+            <p className="text-2xl font-bold text-indigo-600">${product.price.toFixed(2)}</p>
             <p className="text-gray-600">{product.description}</p>
 
             <div className="flex gap-4">
-              <a
-                href="#"
+              <button
                 onClick={handleAddToCart}
-                className="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700"
+                className="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700 w-full"
               >
                 Añadir al carrito
-              </a>
+              </button>
             </div>
           </div>
         </div>
