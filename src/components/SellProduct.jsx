@@ -1,50 +1,45 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { createProduct } from 'services/ApiService'; // Importa la función del servicio
 
 export const SellProduct = () => {
   const [productName, setProductName] = useState('');
   const [price, setPrice] = useState('');
   const [description, setDescription] = useState('');
   const [image, setImage] = useState(null);
+  const [error, setError] = useState('');
   const navigate = useNavigate();
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     const reader = new FileReader();
-    
+
     reader.onloadend = () => {
       setImage(reader.result);
     };
-    
+
     if (file) {
       reader.readAsDataURL(file);
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    // Create a new product object
+
     const newProduct = {
-      id: Date.now(), // Use timestamp as a simple unique ID
-      title: productName,
-      price: parseFloat(price),
-      description: description,
-      image: image || "https://placehold.co/600x400", // Default image if none uploaded
-      rating: 0 // Default rating
+      nombre: productName,
+      precio: parseFloat(price),
+      descripcion: description,
+      imagen: null, // La API define que la imagen puede ser null
+      usuario: { id_usuario: 1 }, // ID del usuario, ajusta según el contexto
     };
 
-    // Get existing products from localStorage
-    const existingProducts = JSON.parse(localStorage.getItem('products')) || [];
-    
-    // Add new product
-    const updatedProducts = [...existingProducts, newProduct];
-    
-    // Save to localStorage
-    localStorage.setItem('products', JSON.stringify(updatedProducts));
-    
-    // Navigate back to products page
-    navigate('/products-page');
+    try {
+      await createProduct(newProduct); // Llama al servicio para crear el producto
+      navigate('/products-page'); // Redirige a la página de productos
+    } catch (error) {
+      setError('Hubo un error al publicar el producto. Intenta de nuevo.');
+    }
   };
 
   return (
@@ -65,7 +60,13 @@ export const SellProduct = () => {
       <div className="container mx-auto px-4 py-8">
         <form onSubmit={handleSubmit} className="max-w-md mx-auto bg-white p-8 rounded-lg shadow-md">
           <h2 className="text-2xl font-bold mb-6 text-center">Vender Producto</h2>
-          
+
+          {error && (
+            <div className="text-red-500 text-center mb-4">
+              {error}
+            </div>
+          )}
+
           <div className="mb-4">
             <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="productName">
               Nombre del Producto

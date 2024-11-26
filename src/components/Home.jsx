@@ -3,11 +3,12 @@ import { Link, useNavigate } from "react-router-dom";
 import { Logo } from "./Logo";
 import { Input } from "./Input";
 import { Button } from "./Button";
+import { login } from "services/ApiService";
 
 export default function Home() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState(''); 
+  const [error, setError] = useState('');
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
@@ -15,14 +16,17 @@ export default function Home() {
 
     if (username.includes('@')) {
       setError("El nombre de usuario no debe contener el carácter '@'.");
-      return; 
+      return;
     }
 
-    if (username && password) {
-      setError(''); 
-      navigate('/products-page'); 
+    // Llamamos a la función login y verificamos si la respuesta es true o false
+    const success = await login(username, password);
+
+    if (success) {
+      setError('');  // Limpiamos cualquier mensaje de error previo
+      navigate('/products-page');  // Redirigimos a la página de productos
     } else {
-      setError('Por favor completa todos los campos.');
+      setError('Ha ocurrido un error al momento de iniciar sesión');  // Mostramos el mensaje de error
     }
   };
 

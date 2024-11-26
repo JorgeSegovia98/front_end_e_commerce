@@ -1,11 +1,35 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useCart } from './CartContext';
-import { Button } from './Button';
 
 export const Cart = () => {
   const navigate = useNavigate();
-  const { cartItems, removeFromCart, updateQuantity, getCartTotal } = useCart();
+  
+  // Estado para almacenar los productos del carrito
+  const [cartItems, setCartItems] = useState([]);
+  
+  // Cargar los productos del carrito desde localStorage
+  useEffect(() => {
+    const storedCartItems = JSON.parse(localStorage.getItem('cartItems')) || [];
+    setCartItems(storedCartItems);
+  }, []);
+
+  const getCartTotal = () => {
+    return cartItems.reduce((total, item) => total + (item.price * item.quantity), 0);
+  };
+
+  const removeFromCart = (id) => {
+    const updatedCart = cartItems.filter(item => item.id !== id);
+    setCartItems(updatedCart);
+    localStorage.setItem('cartItems', JSON.stringify(updatedCart));
+  };
+
+  const updateQuantity = (id, newQuantity) => {
+    const updatedCart = cartItems.map(item => 
+      item.id === id ? { ...item, quantity: parseInt(newQuantity) } : item
+    );
+    setCartItems(updatedCart);
+    localStorage.setItem('cartItems', JSON.stringify(updatedCart));
+  };
 
   const goToPayment = () => {
     navigate('/payment');
@@ -15,11 +39,12 @@ export const Cart = () => {
     return (
       <div className="container mx-auto px-4 py-8">
         <h1 className="text-2xl font-bold mb-6">Tu carrito está vacío</h1>
-        <Button 
-          type="button" 
-          text="Seguir comprando" 
-          onClick={() => navigate('/products-page')}
-        />
+        <a 
+          href="/products-page"
+          className="inline-block bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 text-center"
+        >
+          Seguir comprando
+        </a>
       </div>
     );
   }
@@ -47,16 +72,17 @@ export const Cart = () => {
                       value={item.quantity}
                       onChange={(e) => updateQuantity(item.id, e.target.value)}
                     >
-                      {[1,2,3,4,5].map(num => (
+                      {[1, 2, 3, 4, 5].map(num => (
                         <option key={num} value={num}>{num}</option>
                       ))}
                     </select>
-                    <button 
+                    <a 
+                      href="#"
                       className="text-red-500 hover:text-red-700"
                       onClick={() => removeFromCart(item.id)}
                     >
                       Eliminar
-                    </button>
+                    </a>
                   </div>
                 </div>
               </div>
@@ -77,11 +103,13 @@ export const Cart = () => {
                 <span>${getCartTotal().toFixed(2)}</span>
               </div>
             </div>
-            <Button 
-              type="button" 
-              text="Continuar al pago" 
+            <a 
+              href="#"
+              className="inline-block bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700 text-center"
               onClick={goToPayment}
-            />
+            >
+              Continuar al pago
+            </a>
           </div>
         </div>
       </div>

@@ -2,98 +2,47 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ProductCard } from './ProductCard';
 import { Pagination } from './Pagination';
+import { getAllProducts } from 'services/ApiService';  // Asegúrate de importar la función correctamente
 
 const ProductsPage = () => {
   const [products, setProducts] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [search, setSearch] = useState('');
   const [sortOption, setSortOption] = useState('all');
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState('');
   const navigate = useNavigate();
   const productsPerPage = 8;
 
   useEffect(() => {
-    // Mock products
-    const mockProducts = [
-      {
-        id: 1,
-        title: "Producto 1",
-        price: 99.99,
-        description: "Descripción del producto 1",
-        image: "https://placehold.co/600x400",
-        rating: 4.5,
-      },
-      {
-        id: 2,
-        title: "Producto 2",
-        price: 149.99,
-        description: "Descripción del producto 2",
-        image: "https://placehold.co/600x400",
-        rating: 4.0,
-      },
-      {
-        id: 3,
-        title: "Producto 3",
-        price: 149.99,
-        description: "Descripción del producto 3",
-        image: "https://placehold.co/600x400",
-        rating: 4.0,
-      },
-      {
-        id: 4,
-        title: "Producto 4",
-        price: 149.99,
-        description: "Descripción del producto 4",
-        image: "https://placehold.co/600x400",
-        rating: 4.0,
-      },
-      {
-        id: 5,
-        title: "Producto 5",
-        price: 149.99,
-        description: "Descripción del producto 5",
-        image: "https://placehold.co/600x400",
-        rating: 4.0,
-      },
-      {
-        id: 6,
-        title: "Producto 6",
-        price: 149.99,
-        description: "Descripción del producto 6",
-        image: "https://placehold.co/600x400",
-        rating: 4.0,
-      },
-      {
-        id: 7,
-        title: "Producto 7",
-        price: 149.99,
-        description: "Descripción del producto 7",
-        image: "https://placehold.co/600x400",
-        rating: 4.0,
-      },
-      {
-        id: 8,
-        title: "Producto 8",
-        price: 149.99,
-        description: "Descripción del producto 8",
-        image: "https://placehold.co/600x400",
-        rating: 4.0,
-      },
-    ];
+    const fetchProducts = async () => {
+      setIsLoading(true);
+      try {
+        const fetchedProducts = await getAllProducts();
+        console.log(fetchedProducts);
 
-    // Retrieve products from localStorage
-    const storedProducts = JSON.parse(localStorage.getItem('products')) || [];
-    
-    // Combine mock products with stored products
-    const combinedProducts = [
-      ...mockProducts,
-      ...storedProducts.filter(sp => !mockProducts.some(mp => mp.id === sp.id))
-    ];
+        // Mapeamos los productos para ajustarlos a nuestro formato esperado
+        const mappedProducts = fetchedProducts._embedded.productos.map((product, index) => ({
+          id: index + 1, // Usamos el índice como ID temporal
+          title: product.nombre,
+          price: product.precio,
+          description: product.descripcion,
+          image: product.imagen || 'https://placehold.co/600x400',  // Imagen por defecto si no existe
+        }));
 
-    setProducts(combinedProducts);
+        setProducts(mappedProducts);
+      } catch (error) {
+        setError('Error al cargar los productos');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchProducts();
   }, []);
 
   const sortProducts = (productsToSort) => {
-    switch(sortOption) {
+    switch (sortOption) {
       case 'price-asc':
         return [...productsToSort].sort((a, b) => a.price - b.price);
       case 'price-desc':
@@ -112,7 +61,7 @@ const ProductsPage = () => {
   const indexOfLastProduct = currentPage * productsPerPage;
   const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
   const currentProducts = filteredAndSortedProducts.slice(
-    indexOfFirstProduct, 
+    indexOfFirstProduct,
     indexOfLastProduct
   );
 
@@ -200,7 +149,15 @@ const ProductsPage = () => {
 
       {/* Productos */}
       <div className="container mx-auto px-4 py-16">
-        {filteredAndSortedProducts.length === 0 ? (
+        {isLoading ? (
+          <div className="text-center text-gray-600 text-xl">
+            Cargando productos...
+          </div>
+        ) : error ? (
+          <div className="text-center text-red-600 text-xl">
+            {error}
+          </div>
+        ) : filteredAndSortedProducts.length === 0 ? (
           <div className="text-center text-gray-600 text-xl">
             No se encontraron productos
           </div>

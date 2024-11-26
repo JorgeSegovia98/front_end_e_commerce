@@ -10,7 +10,7 @@ import RegisterPage from "../components/RegisterPage";
 import ForgotPassword from "../components/ForgotPassword";
 import ProductsPage from "../components/ProductsPage";
 import { SellProduct } from "../components/SellProduct";
-import { MyProductsPage } from "../components/MyProductsPage";
+import MyProductsPage from "components/MyProductsPage";
 import MyOrdersPage from "../components/MyOrdersPage"; 
 import GroupChatPage from "../components/GroupChatPage";
 

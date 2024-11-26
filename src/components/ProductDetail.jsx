@@ -1,52 +1,66 @@
-import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { Button } from './Button';
-import { useCart } from './CartContext';
+import React, { useState, useEffect } from 'react'; 
+import { useParams, useLocation, useNavigate } from 'react-router-dom';
 
 export const ProductDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [product, setProduct] = useState(null);
-  const { addToCart } = useCart();
+  const { state } = useLocation(); // Obtener los datos del estado enviado desde ProductCard
+  const [product, setProduct] = useState(state ? state.product : null); // Inicializar con los datos del estado o null
   const [search, setSearch] = useState('');
 
+  // Cargar el producto si no se pasó desde la card
   useEffect(() => {
-    // Lógica para obtener el producto (mock mientras no hay API)
-    const mockProduct = {
-      id: parseInt(id),
-      title: `Producto ${id}`,
-      price: 99.99,
-      description: `Descripción detallada del producto ${id}...`,
-      image: "https://placehold.co/600x400",
-      rating: 5,
-    };
+    if (!product) {
+      const fetchProduct = async () => {
+        try {
+          const response = await fetch(`http://localhost:8080/data-api/productos/${id}`);
+          if (!response.ok) {
+            throw new Error('Error al obtener el producto');
+          }
+          const fetchedProduct = await response.json();
+          setProduct(fetchedProduct);
+        } catch (error) {
+          console.error(error);
+        }
+      };
 
-    setProduct(mockProduct);
-  }, [id]);
+      fetchProduct();
+    }
+  }, [id, product]);
 
   const handleAddToCart = () => {
-    
-    // Obtiene el carrito actual del localStorage
-    const cart = JSON.parse(localStorage.getItem('cartItems')) || [];
-    
-    // Verifica si el producto ya existe en el carrito
-    const existingProduct = cart.find((item) => item.id === product.id);
-    
-    if (existingProduct) {
-      // Incrementa la cantidad del producto si ya existe
-      existingProduct.quantity += 1;
-    } else {
-      // Agrega el producto con cantidad inicial de 1
-      cart.push({ ...product, quantity: 1 });
+    console.log("handleAddToCart triggered");
+
+    if (!product) {
+      console.error('Producto no encontrado');
+      return;
     }
+
+    // Obtener el carrito desde localStorage (si existe), o crear uno vacío si no existe
+    let cart = JSON.parse(localStorage.getItem('cartItems')) || [];
     
-    // Guarda el carrito actualizado en el localStorage
+    console.log("Carrito actual:", cart);
+
+    // Verificar si el producto ya está en el carrito
+    const existingProductIndex = cart.findIndex((item) => item.id === product.id);
+
+    if (existingProductIndex !== -1) {
+      // Si el producto ya está en el carrito, incrementamos la cantidad
+      cart[existingProductIndex].quantity += 1;
+      console.log('Producto actualizado en el carrito:', cart[existingProductIndex]);
+    } else {
+      // Si el producto no está en el carrito, lo agregamos con una cantidad de 1
+      cart.push({ ...product, quantity: 1 });
+      console.log('Producto agregado al carrito:', product);
+    }
+
+    // Guardar el carrito actualizado en localStorage
     localStorage.setItem('cartItems', JSON.stringify(cart));
-    
-    // Opcional: redirigir al carrito después de agregar el producto
+    console.log('Carrito actualizado en localStorage:', cart);
+
+    // Redirigir al carrito
     navigate('/cart');
   };
-  
 
   if (!product) {
     return (
@@ -77,9 +91,12 @@ export const ProductDetail = () => {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
-            <button className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700">
+            <a
+              href="#"
+              className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700"
+            >
               Buscar
-            </button>
+            </a>
           </div>
         </div>
       </nav>
@@ -107,11 +124,13 @@ export const ProductDetail = () => {
             <p className="text-gray-600">{product.description}</p>
 
             <div className="flex gap-4">
-              <Button
-                type="button"
-                text="Añadir al carrito"
+              <a
+                href="#"
                 onClick={handleAddToCart}
-              />
+                className="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700"
+              >
+                Añadir al carrito
+              </a>
             </div>
           </div>
         </div>

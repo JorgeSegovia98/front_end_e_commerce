@@ -3,6 +3,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { Logo } from "./Logo";
 import { Input } from "./Input";
 import { Button } from "./Button";
+import { register } from "services/ApiService"; // Importamos la función register
 
 export default function RegisterPage() {
   const [formData, setFormData] = useState({
@@ -16,6 +17,7 @@ export default function RegisterPage() {
     securityAnswer: ''
   });
 
+  const [error, setError] = useState('');
   const navigate = useNavigate();
 
   const securityQuestions = [
@@ -32,43 +34,32 @@ export default function RegisterPage() {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Validations
+    // Validaciones
     if (formData.password !== formData.confirmPassword) {
-      alert("Las contraseñas no coinciden");
+      setError("Las contraseñas no coinciden");
       return;
     }
 
-    // Create user object to store
-    const userToStore = {
-      username: formData.username,
-      email: formData.email,
-      address: formData.address,
-      phone: formData.phone,
-      password: formData.password,
-      securityQuestion: formData.securityQuestion,
-      securityAnswer: formData.securityAnswer
-    };
+    // Llamamos a la función register desde el servicio
+    const response = await register(
+      formData.username, 
+      formData.password, 
+      formData.email, 
+      formData.address, 
+      formData.phone, 
+      formData.securityQuestion, 
+      formData.securityAnswer
+    );
 
-    // Get existing users or initialize empty array
-    const existingUsers = JSON.parse(localStorage.getItem('users')) || [];
-    
-    // Check if email already exists
-    const userExists = existingUsers.some(user => user.email === formData.email);
-    
-    if (userExists) {
-      alert("Este correo electrónico ya está registrado");
-      return;
+    if (response === true) {
+      setError(''); // Limpiamos cualquier mensaje de error previo
+      navigate('/'); // Redirigimos a la página de login
+    } else {
+      setError(response.message || 'Ha ocurrido un error al registrar la cuenta'); // Mostramos el error si ocurrió
     }
-
-    // Add new user
-    existingUsers.push(userToStore);
-    localStorage.setItem('users', JSON.stringify(existingUsers));
-
-    // Navigate to login or home page
-    navigate('/');
   };
 
   return (
@@ -79,6 +70,11 @@ export default function RegisterPage() {
         <p className="text-gray-500 text-center">¡Únete y explora nuestros productos!</p>
         
         <form onSubmit={handleSubmit} className="space-y-4">
+          {error && (
+            <div className="text-red-500 text-sm text-center">
+              {error}
+            </div>
+          )}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-4">
               <Input
