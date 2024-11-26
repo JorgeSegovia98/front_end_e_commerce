@@ -11,8 +11,9 @@ import ForgotPassword from "../components/ForgotPassword";
 import ProductsPage from "../components/ProductsPage";
 import { SellProduct } from "../components/SellProduct";
 import { MyProductsPage } from "../components/MyProductsPage";
-import MyOrdersPage from "../components/MyOrdersPage";
+import MyOrdersPage from "../components/MyOrdersPage"; 
 import GroupChatPage from "../components/GroupChatPage";
+
 
 export default function AppRoutes() {
   return (
@@ -29,8 +30,8 @@ export default function AppRoutes() {
           <Route path="/payment" element={<Payment />} />
           <Route path="/sell-product" element={<SellProduct />} />
           <Route path="/my-products" element={<MyProductsPage />} />
-          <Route path="/my-orders" element={<MyOrdersPage />} />
-          <Route path="/group-chat" element={<GroupChatPage />} />
+          <Route path="/my-orders" element={<MyOrdersPage />} /> {/* Nueva ruta */}
+          <Route path="/group-chat" element={<GroupChatPage />} /> {/* Nueva ruta */}
         </Routes>
       </CartProvider>
     </Router>
