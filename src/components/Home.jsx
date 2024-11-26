@@ -5,19 +5,24 @@ import { Input } from "./Input";
 import { Button } from "./Button";
 
 export default function Home() {
-  const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState(''); 
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    // Simulación de autenticación
-    const isLoginSuccessful = email && password; // Valida que ambos campos no estén vacíos
 
-    if (isLoginSuccessful) {
-      navigate('/products-page'); // Redirige a ProductsPage
+    if (username.includes('@')) {
+      setError("El nombre de usuario no debe contener el carácter '@'.");
+      return; 
+    }
+
+    if (username && password) {
+      setError(''); 
+      navigate('/products-page'); 
     } else {
-      console.error('Credenciales incorrectas');
+      setError('Por favor completa todos los campos.');
     }
   };
 
@@ -28,13 +33,18 @@ export default function Home() {
         <h1 className="text-2xl font-bold text-gray-800 text-center">Bienvenido de nuevo</h1>
         <p className="text-gray-500 text-center">Ingresa a tu cuenta</p>
         <form className="space-y-4" onSubmit={handleLogin}>
+          {error && (
+            <div className="text-red-500 text-sm text-center">
+              {error}
+            </div>
+          )}
           <Input
-            label="Correo electrónico"
-            type="email"
-            name="email"
-            placeholder="ejemplo@correo.com"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            label="Nombre de usuario"
+            type="text"
+            name="username"
+            placeholder="Tu nombre de usuario"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
           />
           <Input
             label="Contraseña"
