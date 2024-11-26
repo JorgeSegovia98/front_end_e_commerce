@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ProductCard } from './ProductCard';
 import { Pagination } from './Pagination';
-import { getAllProducts } from 'services/ApiService';
+import { getAllProducts, getProductImage } from 'services/ApiService';
 import { useCart } from './CartContext';
 
 const ProductsPage = () => {
@@ -21,14 +21,22 @@ const ProductsPage = () => {
       setIsLoading(true);
       try {
         const fetchedProducts = await getAllProducts();
+
+        // Enviar ID del backend por favor
         const mappedProducts = fetchedProducts._embedded.productos.map((product) => ({
           id: product.id, 
           title: product.nombre,
           price: product.precio,
           description: product.descripcion,
-          image: product.imagen || 'https://placehold.co/600x400',
+          image: null,
           rating: 4
         }));
+
+        for(const mappedProduct of mappedProducts) {
+          mappedProduct.image = await getProductImage(mappedProduct.id) || 'https://placehold.co/600x400'
+        }
+
+        console.log(mappedProducts.at(0))
 
         setProducts(mappedProducts);
       } catch (error) {

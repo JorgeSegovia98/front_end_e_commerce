@@ -24,6 +24,30 @@ export async function login(username, password) {
   }
 }
 
+export async function changePassword(username, newPassword) {
+  try {
+    const response = await fetch(`${API}/cambiar-contrasena`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        username: username,
+        nuevaContrasena: newPassword,
+      }),
+    });
+
+    if (response.status === 200) {
+      return true;  
+    } else {
+      return false; 
+    }
+  } catch (error) {
+    console.error('Error durante el cambio de contraseña:', error);
+    return false; 
+  }
+}
+
 export async function register(username, password, correo, direccion, telefono, preguntaSeguridad) {
   try {
     const response = await fetch(`${API}/registro`, {
@@ -109,3 +133,11 @@ export async function createProduct(product) {
     }
     return await response.json();
   };
+
+  export const getProductImage = async (productoId) => {
+    const response = await fetch(`${API}/imagen/${productoId}`);
+    if (!response.ok) {
+      return false;
+    }
+    return await response.json();
+  }

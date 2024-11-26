@@ -3,6 +3,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { Logo } from "./Logo";
 import { Input } from "./Input";
 import { Button } from "./Button";
+import { changePassword } from "services/ApiService";
 
 export default function ForgotPassword() {
   const [step, setStep] = useState(1);
@@ -45,7 +46,7 @@ export default function ForgotPassword() {
     }
   };
 
-  const handlePasswordReset = (e) => {
+  const handlePasswordReset = async (e) => {
     e.preventDefault();
 
     if (newPassword !== confirmPassword) {
@@ -58,8 +59,13 @@ export default function ForgotPassword() {
       return;
     }
 
-    // Aquí iría el código para enviar la nueva contraseña al backend
-    alert('Contraseña actualizada exitosamente.');
+    const changePasswordResponse = await changePassword(username, newPassword);
+
+    if (changePasswordResponse) {
+      alert('Contraseña actualizada exitosamente.');
+    } else {
+      alert('Hubo un problema al actualizar la contraseña.');
+    }
     navigate('/');
   };
 
