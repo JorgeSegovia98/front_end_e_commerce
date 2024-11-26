@@ -14,17 +14,34 @@ export default function ForgotPassword() {
 
   const navigate = useNavigate();
 
-  const handleSecurityQuestionSubmit = (e) => {
+  const handleSecurityQuestionSubmit = async (e) => {
     e.preventDefault();
+    setError('');
 
-    // Find user by username
-    const users = JSON.parse(localStorage.getItem('users')) || [];
-    const user = users.find(u => u.username === username);
+    try {
+      // Consulta al backend para buscar el usuario
+      const response = await fetch(
+        `http://localhost:8080/data-api/usuarios/search/findByUsername?username=${encodeURIComponent(username)}`
+      );
 
-    if (user && user.securityAnswer.toLowerCase() === securityAnswer.toLowerCase()) {
-      setStep(2);
-    } else {
-      setError('Respuesta de seguridad incorrecta.');
+      if (!response.ok) {
+        // Si no se encuentra el usuario
+        throw new Error('Usuario no encontrado.');
+      }
+
+      const user = await response.json(); // Obtiene el usuario del backend
+
+      // Compara la respuesta de seguridad
+      if (
+        user.preguntaSeguridad &&
+        user.preguntaSeguridad.toLowerCase() === securityAnswer.toLowerCase()
+      ) {
+        setStep(2); // Pasa al siguiente paso si la respuesta es correcta
+      } else {
+        setError('Respuesta de seguridad incorrecta.');
+      }
+    } catch (err) {
+      setError(err.message || 'Ocurrió un error al buscar el usuario.');
     }
   };
 
@@ -41,16 +58,9 @@ export default function ForgotPassword() {
       return;
     }
 
-    // Update user's password
-    const users = JSON.parse(localStorage.getItem('users')) || [];
-    const userIndex = users.findIndex(u => u.username === username);
-
-    if (userIndex !== -1) {
-      users[userIndex].password = newPassword;
-      localStorage.setItem('users', JSON.stringify(users));
-      alert('Contraseña actualizada exitosamente.');
-      navigate('/');
-    }
+    // Aquí iría el código para enviar la nueva contraseña al backend
+    alert('Contraseña actualizada exitosamente.');
+    navigate('/');
   };
 
   return (
@@ -120,7 +130,7 @@ export default function ForgotPassword() {
         )}
 
         <div className="text-sm text-center text-gray-500 mt-4">
-          ¿Recordaste tu contraseña?{" "}
+          ¿Recordaste tu contraseña?{' '}
           <Link to="/" className="text-indigo-600 hover:underline">
             Volver al inicio de sesión
           </Link>

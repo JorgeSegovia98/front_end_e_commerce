@@ -49,8 +49,7 @@ export default function RegisterPage() {
       formData.password, 
       formData.email, 
       formData.address, 
-      formData.phone, 
-      formData.securityQuestion, 
+      formData.phone,
       formData.securityAnswer
     );
 

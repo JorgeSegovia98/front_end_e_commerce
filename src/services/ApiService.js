@@ -24,7 +24,7 @@ export async function login(username, password) {
   }
 }
 
-export async function register(username, password, correo, direccion, telefono) {
+export async function register(username, password, correo, direccion, telefono, preguntaSeguridad) {
   try {
     const response = await fetch(`${API}/registro`, {
       method: 'POST',
@@ -37,6 +37,7 @@ export async function register(username, password, correo, direccion, telefono) 
         correo: correo,
         direccion: direccion,
         telefono: telefono,
+        preguntaSeguridad: preguntaSeguridad
       }),
     });
 
