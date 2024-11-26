@@ -12,7 +12,7 @@ const ProductsPage = () => {
   const productsPerPage = 8;
 
   useEffect(() => {
-    // Combine mock products with products from localStorage
+    // Mock products
     const mockProducts = [
       {
         id: 1,
@@ -83,7 +83,7 @@ const ProductsPage = () => {
     // Retrieve products from localStorage
     const storedProducts = JSON.parse(localStorage.getItem('products')) || [];
     
-    // Combine mock products with stored products, ensuring no duplicates
+    // Combine mock products with stored products
     const combinedProducts = [
       ...mockProducts,
       ...storedProducts.filter(sp => !mockProducts.some(mp => mp.id === sp.id))
@@ -92,7 +92,6 @@ const ProductsPage = () => {
     setProducts(combinedProducts);
   }, []);
 
-  // Sorting function
   const sortProducts = (productsToSort) => {
     switch(sortOption) {
       case 'price-asc':
@@ -104,7 +103,6 @@ const ProductsPage = () => {
     }
   };
 
-  // Filtered and sorted products
   const filteredAndSortedProducts = sortProducts(
     products.filter((product) =>
       product.title.toLowerCase().includes(search.toLowerCase())
@@ -120,20 +118,19 @@ const ProductsPage = () => {
 
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
-  const handleTitleClick = () => {
-    navigate('/products-page');
-  };
-
-  const handleSellProduct = () => {
-    navigate('/sell-product');
-  };
-
   const handleMyProducts = () => {
     navigate('/my-products');
   };
 
+  const handleMyOrders = () => {
+    navigate('/my-orders');
+  };
+
+  const handleGroupChat = () => {
+    navigate('/group-chat');
+  };
+
   const handleSearch = () => {
-    // Reset to first page when searching
     setCurrentPage(1);
   };
 
@@ -145,13 +142,13 @@ const ProductsPage = () => {
           <div className="flex items-center gap-4">
             <h1 
               className="text-2xl font-bold text-blue-600 cursor-pointer"
-              onClick={handleTitleClick}
+              onClick={() => navigate('/products-page')}
             >
               Tienda Virtual
             </h1>
             <button 
               className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
-              onClick={handleSellProduct}
+              onClick={() => navigate('/sell-product')}
             >
               Vender un producto
             </button>
@@ -161,9 +158,20 @@ const ProductsPage = () => {
             >
               Ver mis productos
             </button>
+            <button 
+              className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+              onClick={handleMyOrders}
+            >
+              Mis pedidos
+            </button>
+            <button 
+              className="bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600"
+              onClick={handleGroupChat}
+            >
+              Chat grupal
+            </button>
           </div>
           <div className="flex items-center gap-4">
-            {/* Filtros */}
             <select 
               className="border border-gray-300 rounded px-4 py-2"
               value={sortOption}
@@ -173,7 +181,6 @@ const ProductsPage = () => {
               <option value="price-asc">Precio: Menor a Mayor</option>
               <option value="price-desc">Precio: Mayor a Menor</option>
             </select>
-            {/* Barra de búsqueda */}
             <input
               type="text"
               placeholder="Buscar productos..."
