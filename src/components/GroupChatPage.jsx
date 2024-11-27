@@ -1,15 +1,16 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Client } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
+import {getCookie} from "utils/Cookies"
 
 const GroupChatPage = () => {
   const [messages, setMessages] = useState([]); 
   const [messageInput, setMessageInput] = useState(""); 
   const clientRef = useRef(null); 
+  const nombreUsuario = getCookie("username"); // Asegúrate de que se obtenga el nombre correcto del usuario.
 
   useEffect(() => {
-
-    const socket = new SockJS('http://localhost:8080/chat-websocket'); 
+    const socket = new SockJS('https://backend-ecommerse-b6anfne4gqgacyc5.canadacentral-01.azurewebsites.net/chat-websocket'); 
     const client = new Client({
       webSocketFactory: () => socket,
       onConnect: (frame) => {
@@ -24,12 +25,8 @@ const GroupChatPage = () => {
       },
     });
 
-
     clientRef.current = client;
-
-
     client.activate();
-
 
     return () => {
       if (clientRef.current) {
@@ -38,10 +35,9 @@ const GroupChatPage = () => {
     };
   }, []);
 
-
   const sendMessage = () => {
     if (messageInput.trim()) {
-      const message = { contenido: messageInput, emisor: 'Usuario' }; 
+      const message = { contenido: messageInput, emisor: nombreUsuario }; 
       clientRef.current.publish({
         destination: '/app/enviarMensaje', 
         body: JSON.stringify(message),
@@ -58,11 +54,11 @@ const GroupChatPage = () => {
           {messages.map((message, index) => (
             <li
               key={index}
-              className={`flex ${message.emisor === 'Usuario' ? 'justify-end' : 'justify-start'}`}
+              className={`flex ${message.emisor === nombreUsuario ? 'justify-end' : 'justify-start'}`}
             >
               <div
                 className={`max-w-xs p-3 rounded-lg shadow-sm ${
-                  message.emisor === 'Usuario'
+                  message.emisor === nombreUsuario
                     ? 'bg-indigo-600 text-white'
                     : 'bg-gray-100 text-gray-800'
                 }`}

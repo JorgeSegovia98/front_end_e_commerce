@@ -4,8 +4,10 @@ import { Logo } from "./Logo";
 import { Input } from "./Input";
 import { Button } from "./Button";
 import { login } from "services/ApiService";
+import {setCookie} from "utils/Cookies"
 
 export default function Home() {
+
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -19,14 +21,15 @@ export default function Home() {
       return;
     }
 
-    // Llamamos a la función login y verificamos si la respuesta es true o false
+    
     const success = await login(username, password);
 
     if (success) {
-      setError('');  // Limpiamos cualquier mensaje de error previo
-      navigate('/products-page');  // Redirigimos a la página de productos
+      setCookie('username', username);
+      setError('');  
+      navigate('/products-page');  
     } else {
-      setError('Ha ocurrido un error al momento de iniciar sesión');  // Mostramos el mensaje de error
+      setError('Ha ocurrido un error al momento de iniciar sesión');  
     }
   };
 

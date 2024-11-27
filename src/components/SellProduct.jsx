@@ -1,53 +1,62 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { createProduct } from 'services/ApiService'; // Importa la función del servicio
+import { createProduct, uploadImage } from 'services/ApiService'; 
+import { getCookie } from "utils/Cookies"
+
 
 export const SellProduct = () => {
+  const idUsuarioCookie = getCookie("id_usuario");
   const [productName, setProductName] = useState('');
   const [price, setPrice] = useState('');
   const [description, setDescription] = useState('');
-  const [image, setImage] = useState(null);
+  const [image, setImage] = useState(null); 
+  const [imageBlob, setImageBlob] = useState(null); 
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
-    const reader = new FileReader();
-
-    reader.onloadend = () => {
-      setImage(reader.result);
-    };
 
     if (file) {
-      reader.readAsDataURL(file);
+      setImage(file); 
+      setImageBlob(file); 
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    const newProduct = {
+  
+    
+    const productData = {
       nombre: productName,
       precio: parseFloat(price),
       descripcion: description,
-      imagen: null, // La API define que la imagen puede ser null
-      usuario: { id_usuario: 1 }, // ID del usuario, ajusta según el contexto
+      usuario: { id_usuario: parseInt(idUsuarioCookie, 10) },
     };
-
+  
     try {
-      await createProduct(newProduct); // Llama al servicio para crear el producto
-      navigate('/products-page'); // Redirige a la página de productos
+      
+      const createdProduct = await createProduct(productData);
+      
+      if (image) {
+        await uploadImage(createdProduct.id, image); 
+      }
+  
+      navigate('/products-page'); 
     } catch (error) {
+      console.log(error)
       setError('Hubo un error al publicar el producto. Intenta de nuevo.');
     }
   };
 
+  
+  
   return (
     <div className="min-h-screen bg-gray-100">
       {/* Navbar */}
       <nav className="bg-white shadow mb-8">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-          <h1 
+          <h1
             className="text-2xl font-bold text-blue-600 cursor-pointer"
             onClick={() => navigate('/products-page')}
           >
@@ -123,9 +132,9 @@ export const SellProduct = () => {
               className="w-full px-3 py-2 border border-gray-300 rounded-md"
             />
             {image && (
-              <img 
-                src={image} 
-                alt="Preview" 
+              <img
+                src={URL.createObjectURL(image)}
+                alt="Preview"
                 className="mt-4 w-full h-48 object-cover rounded-md"
               />
             )}
@@ -142,3 +151,4 @@ export const SellProduct = () => {
     </div>
   );
 };
+

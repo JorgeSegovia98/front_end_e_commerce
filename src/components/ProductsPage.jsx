@@ -5,6 +5,7 @@ import { Pagination } from './Pagination';
 import { getAllProducts, getProductImage } from 'services/ApiService';
 import { useCart } from './CartContext';
 
+
 const ProductsPage = () => {
   const [products, setProducts] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
@@ -22,21 +23,21 @@ const ProductsPage = () => {
       try {
         const fetchedProducts = await getAllProducts();
 
-        // Enviar ID del backend por favor
+        
         const mappedProducts = fetchedProducts._embedded.productos.map((product) => ({
-          id: product.id, 
+          id: product.id,
           title: product.nombre,
           price: product.precio,
           description: product.descripcion,
-          image: null,
+          image: null, 
           rating: 4
         }));
 
-        for(const mappedProduct of mappedProducts) {
-          mappedProduct.image = await getProductImage(mappedProduct.id) || 'https://placehold.co/600x400'
+        
+        for (const mappedProduct of mappedProducts) {
+          const image = await getProductImage(mappedProduct.id);
+          mappedProduct.image = image || 'https://placehold.co/600x400'; 
         }
-
-        console.log(mappedProducts.at(0))
 
         setProducts(mappedProducts);
       } catch (error) {
@@ -98,31 +99,31 @@ const ProductsPage = () => {
       <nav className="bg-white shadow mb-8">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
           <div className="flex items-center gap-4">
-            <h1 
+            <h1
               className="text-2xl font-bold text-blue-600 cursor-pointer"
               onClick={() => navigate('/products-page')}
             >
               Tienda Virtual
             </h1>
-            <button 
+            <button
               className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
               onClick={() => navigate('/sell-product')}
             >
               Vender un producto
             </button>
-            <button 
+            <button
               className="bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600"
               onClick={handleMyProducts}
             >
               Ver mis productos
             </button>
-            <button 
+            <button
               className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
               onClick={handleMyOrders}
             >
               Mis pedidos
             </button>
-            <button 
+            <button
               className="bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600"
               onClick={handleGroupChat}
             >
@@ -130,7 +131,7 @@ const ProductsPage = () => {
             </button>
           </div>
           <div className="flex items-center gap-4">
-            <select 
+            <select
               className="border border-gray-300 rounded px-4 py-2"
               value={sortOption}
               onChange={(e) => setSortOption(e.target.value)}
@@ -146,7 +147,7 @@ const ProductsPage = () => {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
-            <button 
+            <button
               className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700"
               onClick={handleSearch}
             >
@@ -174,9 +175,12 @@ const ProductsPage = () => {
           <>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               {currentProducts.map((product) => (
-                <ProductCard 
-                  key={product.id} 
-                  product={product} 
+                <ProductCard
+                  key={product.id}
+                  product={{
+                    ...product,
+                    image: product.image, 
+                  }}
                   onDetailsClick={() => navigate(`/product-detail/${product.id}`, { state: { product } })}
                 />
               ))}
