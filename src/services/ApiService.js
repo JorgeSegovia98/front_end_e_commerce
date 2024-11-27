@@ -45,7 +45,7 @@ export async function changePassword(username, newPassword) {
         nuevaContrasena: newPassword,
       }),
     });
-
+    
     if (response.status === 200) {
       return true;  
     } else {

@@ -4,6 +4,8 @@ import { Logo } from "./Logo";
 import { Input } from "./Input";
 import { Button } from "./Button";
 import { changePassword } from "services/ApiService";
+const API = 'https://backend-ecommerse-b6anfne4gqgacyc5.canadacentral-01.azurewebsites.net';
+
 
 export default function ForgotPassword() {
   const [step, setStep] = useState(1);
@@ -18,26 +20,34 @@ export default function ForgotPassword() {
   const handleSecurityQuestionSubmit = async (e) => {
     e.preventDefault();
     setError('');
-
+  
     try {
-      // Consulta al backend para buscar el usuario
-      const response = await fetch(
-        `http://localhost:8080/data-api/usuarios/search/findByUsername?username=${encodeURIComponent(username)}`
-      );
-
+      const response = await fetch(`${API}/data-api/usuarios?username=${encodeURIComponent(username)}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+  
       if (!response.ok) {
-        // Si no se encuentra el usuario
         throw new Error('Usuario no encontrado.');
       }
-
-      const user = await response.json(); // Obtiene el usuario del backend
-
-      // Compara la respuesta de seguridad
+  
+      const data = await response.json();
+      // Find the user with the matching username
+      const user = data._embedded.usuarios.find(u => u.username === username);
+  
+      if (!user) {
+        throw new Error('Usuario no encontrado.');
+      }
+  
+      console.log(user.preguntaSeguridad); // This should now work
+  
       if (
         user.preguntaSeguridad &&
-        user.preguntaSeguridad.toLowerCase() === securityAnswer.toLowerCase()
+        user.preguntaSeguridad.trim() === securityAnswer.trim()
       ) {
-        setStep(2); // Pasa al siguiente paso si la respuesta es correcta
+        setStep(2);
       } else {
         setError('Respuesta de seguridad incorrecta.');
       }
