@@ -1,12 +1,15 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { createProduct } from 'services/ApiService'; // Importa la función del servicio
+import { useNavigate, useLocation } from 'react-router-dom';
+import { createProduct, updateProduct, uploadProductImage } from '../services/ApiService';
 
 export const SellProduct = () => {
-  const [productName, setProductName] = useState('');
-  const [price, setPrice] = useState('');
-  const [description, setDescription] = useState('');
-  const [image, setImage] = useState(null);
+  const location = useLocation();
+  const editingProduct = location.state?.product;
+  
+  const [productName, setProductName] = useState(editingProduct?.title || '');
+  const [price, setPrice] = useState(editingProduct?.price || '');
+  const [description, setDescription] = useState(editingProduct?.description || '');
+  const [image, setImage] = useState(editingProduct?.image || null);
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
@@ -26,25 +29,41 @@ export const SellProduct = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const newProduct = {
-      nombre: productName,
-      precio: parseFloat(price),
-      descripcion: description,
-      imagen: null, // La API define que la imagen puede ser null
-      usuario: { id_usuario: 1 }, // ID del usuario, ajusta según el contexto
-    };
-
     try {
-      await createProduct(newProduct); // Llama al servicio para crear el producto
-      navigate('/products-page'); // Redirige a la página de productos
+      const productData = {
+        nombre: productName,
+        precio: parseFloat(price),
+        descripcion: description,
+        imagen: null,
+        usuario: { id_usuario: 1 }, // Adjust based on authentication context
+      };
+
+      let savedProduct;
+      if (editingProduct) {
+        savedProduct = await updateProduct(editingProduct.id, productData);
+      } else {
+        savedProduct = await createProduct(productData);
+      }
+
+      if (image && (!editingProduct || image !== editingProduct.image)) {
+        const response = await fetch(image);
+        const blob = await response.blob();
+        const imageFile = new File([blob], 'product-image.jpg', { 
+          type: blob.type || 'image/jpeg' 
+        });
+
+        await uploadProductImage(savedProduct.id, imageFile);
+      }
+
+      navigate('/my-products');
     } catch (error) {
-      setError('Hubo un error al publicar el producto. Intenta de nuevo.');
+      setError('Hubo un error al publicar/actualizar el producto. Intenta de nuevo.');
+      console.error(error);
     }
   };
 
   return (
     <div className="min-h-screen bg-gray-100">
-      {/* Navbar */}
       <nav className="bg-white shadow mb-8">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
           <h1 
@@ -56,10 +75,11 @@ export const SellProduct = () => {
         </div>
       </nav>
 
-      {/* Sell Product Form */}
       <div className="container mx-auto px-4 py-8">
         <form onSubmit={handleSubmit} className="max-w-md mx-auto bg-white p-8 rounded-lg shadow-md">
-          <h2 className="text-2xl font-bold mb-6 text-center">Vender Producto</h2>
+          <h2 className="text-2xl font-bold mb-6 text-center">
+            {editingProduct ? 'Editar Producto' : 'Vender Producto'}
+          </h2>
 
           {error && (
             <div className="text-red-500 text-center mb-4">
@@ -135,7 +155,7 @@ export const SellProduct = () => {
             type="submit"
             className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition duration-300"
           >
-            Publicar Producto
+            {editingProduct ? 'Actualizar Producto' : 'Publicar Producto'}
           </button>
         </form>
       </div>

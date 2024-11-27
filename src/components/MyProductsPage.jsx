@@ -1,9 +1,8 @@
-// MyProductsPage.js
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ProductCard } from './ProductCard';
 import { Pagination } from './Pagination';
-import { getUserProducts } from 'services/ApiService';
+import { getUserProducts, deleteProduct } from 'services/ApiService';
 
 const MyProductsPage = () => {
   const [products, setProducts] = useState([]);
@@ -20,8 +19,12 @@ const MyProductsPage = () => {
   useEffect(() => {
     const fetchUserProductsData = async () => {
       if (userId) {
-        const userProducts = await getUserProducts(userId);
-        setProducts(userProducts);
+        try {
+          const userProducts = await getUserProducts(userId);
+          setProducts(userProducts);
+        } catch (error) {
+          console.error('Error al obtener los productos', error);
+        }
       } else {
         console.error('No se encontró el userId');
       }
@@ -43,10 +46,19 @@ const MyProductsPage = () => {
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
   // Editar producto
-  const handleEditProduct = (productId) => {
-    const productToEdit = products.find((product) => product.id === productId);
-    setEditingProduct(productToEdit);
-    navigate(`/edit-product/${productId}`);
+  const handleEditProduct = (product) => {
+    setEditingProduct(product);
+    navigate('/sell-product', { state: { product } });
+  };
+
+  // Eliminar producto
+  const handleDeleteProduct = async (productId) => {
+    try {
+      await deleteProduct(productId);
+      setProducts(products.filter(p => p.id !== productId));
+    } catch (error) {
+      console.error('Error al eliminar el producto', error);
+    }
   };
 
   // Volver a la página de productos
@@ -97,12 +109,20 @@ const MyProductsPage = () => {
             currentProducts.map((product) => (
               <div key={product.id} className="relative">
                 <ProductCard product={product} />
-                <button 
-                  className="absolute top-2 right-2 bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600"
-                  onClick={() => handleEditProduct(product.id)}
-                >
-                  Editar
-                </button>
+                <div className="absolute top-2 right-2 flex gap-2">
+                  <button 
+                    className="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600"
+                    onClick={() => handleEditProduct(product)}
+                  >
+                    Editar
+                  </button>
+                  <button 
+                    className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+                    onClick={() => handleDeleteProduct(product.id)}
+                  >
+                    Eliminar
+                  </button>
+                </div>
               </div>
             ))
           )}
