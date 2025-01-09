@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'; 
 import { useParams, useLocation, useNavigate } from 'react-router-dom';
-import { useCart } from './CartContext';
+import { useCart } from '../CartLogic/CartContext';
 
 export const ProductDetail = () => {
   const { id } = useParams();
@@ -73,12 +73,6 @@ export const ProductDetail = () => {
             >
               Tienda Virtual
             </h1>
-            <button 
-              className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
-              onClick={() => navigate('/cart')}
-            >
-              Carrito ({getCartCount()})
-            </button>
           </div>
           <div className="flex items-center gap-4">
             <input

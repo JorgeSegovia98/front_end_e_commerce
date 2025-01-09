@@ -1,18 +1,18 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import { CartProvider } from "../components/CartContext";
-import { CartIcon } from "../components/CartIcon";
-import Home from "../components/Home";
-import { ProductDetail } from "../components/ProductDetail";
-import { Cart } from "../components/Cart";
-import { Payment } from "../components/Payment";
-import RegisterPage from "../components/RegisterPage";
-import ForgotPassword from "../components/ForgotPassword";
-import ProductsPage from "../components/ProductsPage";
-import { SellProduct } from "../components/SellProduct";
-import MyProductsPage from "components/MyProductsPage";
-import MyOrdersPage from "../components/MyOrdersPage"; 
-import GroupChatPage from "../components/GroupChatPage";
+import { CartProvider } from "../components/CartLogic/CartContext";
+import { CartIcon } from "../components/CartLogic/CartIcon";
+import Home from "../components/Login/Home";
+import { ProductDetail } from "../components/UserActions/ProductDetail";
+import { Cart } from "../components/CartLogic/Cart";
+import { Payment } from "../components/UserActions//Payment";
+import RegisterPage from "../components/Login/RegisterPage";
+import ForgotPassword from "../components/Login/ForgotPassword";
+import ProductsPage from "../components/PrincipalPage/ProductsPage";
+import { SellProduct } from "../components/UserActions/SellProduct";
+import MyProductsPage from "components/UserActions/MyProductsPage";
+import MyOrdersPage from "../components/UserActions/MyOrdersPage"; 
+import GroupChatPage from "../components/UserActions/GroupChatPage";
 
 
 export default function AppRoutes() {

@@ -1,25 +1,45 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from './CartContext';
+import { createOrder } from '../../services/ApiService.js'; // Ruta corregida
 
 export const Cart = () => {
   const navigate = useNavigate();
-  const { 
-    cartItems, 
-    removeFromCart, 
-    updateQuantity, 
-    getCartTotal 
-  } = useCart();
+  const { cartItems, removeFromCart, updateQuantity, getCartTotal } = useCart();
 
-  const goToPayment = () => {
-    navigate('/payment');
+  const goToPayment = async () => {
+    // Crear el pedido
+    const pedido = {
+      productos: cartItems.map(item => ({
+        id: item.id,
+        nombre: item.title,
+        cantidad: item.quantity,
+        precio: item.price,
+      })),
+      totalDinero: getCartTotal(),
+      fechaPedido: new Date().toISOString(),
+    };
+
+    try {
+      // Llamar al ApiService para crear el pedido
+      await createOrder(pedido);
+
+      // Guardar el total en localStorage
+      localStorage.setItem('totalPedido', getCartTotal());
+
+      // Redirigir a la página de pago
+      navigate('/payment');
+    } catch (error) {
+      console.error('Error al crear el pedido:', error);
+      alert('Hubo un problema al crear tu pedido. Por favor, intenta nuevamente.');
+    }
   };
 
   if (cartItems.length === 0) {
     return (
       <div className="container mx-auto px-4 py-8">
         <h1 className="text-2xl font-bold mb-6">Tu carrito está vacío</h1>
-        <button 
+        <button
           onClick={() => navigate('/products-page')}
           className="inline-block bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 text-center"
         >
@@ -32,13 +52,14 @@ export const Cart = () => {
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-2xl font-bold mb-6">Tu carrito</h1>
-      
+
       <div className="flex flex-col lg:flex-row gap-8">
+        {/* Lista de productos */}
         <div className="lg:w-2/3">
           {cartItems.map((item) => (
             <div key={item.id} className="bg-white rounded-lg shadow p-6 mb-4">
               <div className="flex gap-4">
-                <img 
+                <img
                   src={item.image}
                   alt={item.title}
                   className="w-24 h-24 object-cover rounded"
@@ -47,16 +68,18 @@ export const Cart = () => {
                   <h3 className="font-semibold">{item.title}</h3>
                   <p className="text-gray-600">${item.price}</p>
                   <div className="flex items-center gap-2 mt-2">
-                    <select 
+                    <select
                       className="border rounded p-1"
                       value={item.quantity}
-                      onChange={(e) => updateQuantity(item.id, e.target.value)}
+                      onChange={(e) => updateQuantity(item.id, parseInt(e.target.value))}
                     >
-                      {[1, 2, 3, 4, 5].map(num => (
-                        <option key={num} value={num}>{num}</option>
+                      {[1, 2, 3, 4, 5].map((num) => (
+                        <option key={num} value={num}>
+                          {num}
+                        </option>
                       ))}
                     </select>
-                    <button 
+                    <button
                       className="text-red-500 hover:text-red-700"
                       onClick={() => removeFromCart(item.id)}
                     >
@@ -69,20 +92,23 @@ export const Cart = () => {
           ))}
         </div>
 
+        {/* Resumen del pedido */}
         <div className="lg:w-1/3">
           <div className="bg-white rounded-lg shadow p-6">
             <h2 className="text-xl font-semibold mb-4">Resumen del pedido</h2>
             <div className="space-y-2 mb-4">
-              <div className="flex justify-between">
-                <span>Subtotal</span>
-                <span>${getCartTotal().toFixed(2)}</span>
-              </div>
+              {cartItems.map((item) => (
+                <div key={item.id} className="flex justify-between">
+                  <span>{item.title} x {item.quantity}</span>
+                  <span>${(item.price * item.quantity).toFixed(2)}</span>
+                </div>
+              ))}
               <div className="flex justify-between font-bold">
                 <span>Total</span>
                 <span>${getCartTotal().toFixed(2)}</span>
               </div>
             </div>
-            <button 
+            <button
               className="inline-block bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700 text-center w-full"
               onClick={goToPayment}
             >

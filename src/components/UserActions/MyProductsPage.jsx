@@ -1,8 +1,8 @@
 // MyProductsPage.js
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ProductCard } from './ProductCard';
-import { Pagination } from './Pagination';
+import { ProductCard } from 'components/PrincipalPage//ProductCard';
+import { Pagination } from 'components/PrincipalPage/Pagination';
 import { getUserProducts } from 'services/ApiService';
 
 const MyProductsPage = () => {
@@ -59,29 +59,12 @@ const MyProductsPage = () => {
       {/* Navbar */}
       <nav className="bg-white shadow mb-8">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-          <div className="flex items-center gap-4">
-            <h1 
-              className="text-2xl font-bold text-blue-600 cursor-pointer"
-              onClick={handleBackToProducts}
-            >
-              Tienda Virtual
-            </h1>
-            <button 
-              className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
-              onClick={() => navigate('/sell-product')}
-            >
-              Vender un producto
-            </button>
-          </div>
-          <div className="flex items-center gap-4">
-            <input
-              type="text"
-              placeholder="Buscar productos..."
-              className="border border-gray-300 rounded px-4 py-2 w-64"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
-          </div>
+          <h1
+            className="text-2xl font-bold text-blue-600 cursor-pointer"
+            onClick={() => navigate('/products-page')}
+          >
+            Tienda Virtual
+          </h1>
         </div>
       </nav>
 

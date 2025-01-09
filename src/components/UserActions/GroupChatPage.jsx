@@ -1,22 +1,24 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Client } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
-import {getCookie} from "utils/Cookies"
+import { getCookie } from "utils/Cookies";
+import { useNavigate } from 'react-router-dom'; // ✅ Importar useNavigate
 
 const GroupChatPage = () => {
-  const [messages, setMessages] = useState([]); 
-  const [messageInput, setMessageInput] = useState(""); 
-  const clientRef = useRef(null); 
-  const nombreUsuario = getCookie("username"); // Asegúrate de que se obtenga el nombre correcto del usuario.
+  const [messages, setMessages] = useState([]);
+  const [messageInput, setMessageInput] = useState("");
+  const clientRef = useRef(null);
+  const nombreUsuario = getCookie("username");
+  const navigate = useNavigate(); // ✅ Usar navigate
 
   useEffect(() => {
-    const socket = new SockJS('https://backend-ecommerse-b6anfne4gqgacyc5.canadacentral-01.azurewebsites.net/chat-websocket'); 
+    const socket = new SockJS('https://backend-ecommerse-b6anfne4gqgacyc5.canadacentral-01.azurewebsites.net/chat-websocket');
     const client = new Client({
       webSocketFactory: () => socket,
       onConnect: (frame) => {
         console.log('Conectado: ' + frame);
         client.subscribe('/topic/mensajes', (message) => {
-          const parsedMessage = JSON.parse(message.body); 
+          const parsedMessage = JSON.parse(message.body);
           setMessages((prevMessages) => [...prevMessages, parsedMessage]);
         });
       },
@@ -37,17 +39,25 @@ const GroupChatPage = () => {
 
   const sendMessage = () => {
     if (messageInput.trim()) {
-      const message = { contenido: messageInput, emisor: nombreUsuario }; 
+      const message = { contenido: messageInput, emisor: nombreUsuario };
       clientRef.current.publish({
-        destination: '/app/enviarMensaje', 
+        destination: '/app/enviarMensaje',
         body: JSON.stringify(message),
       });
-      setMessageInput(""); 
+      setMessageInput("");
     }
   };
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-b from-blue-50 to-indigo-100 py-6">
+      {/* Botón de regreso a products-page */}
+      <button
+        onClick={() => navigate('/products-page')}
+        className="text-blue-600 hover:text-blue-800 font-bold mb-4 self-start px-4"
+      >
+        ← Volver a la tienda
+      </button>
+
       <h1 className="text-4xl font-bold text-center text-gray-800">Chat Grupal</h1>
       <div className="chat-container mt-8 mx-auto w-full max-w-2xl bg-white rounded-lg shadow-lg p-6 overflow-auto h-96">
         <ul id="messages" className="space-y-4">

@@ -3,8 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { ProductCard } from './ProductCard';
 import { Pagination } from './Pagination';
 import { getAllProducts, getProductImage } from 'services/ApiService';
-import { useCart } from './CartContext';
-
+import { useCart } from '../CartLogic/CartContext';
 
 const ProductsPage = () => {
   const [products, setProducts] = useState([]);
@@ -23,20 +22,18 @@ const ProductsPage = () => {
       try {
         const fetchedProducts = await getAllProducts();
 
-        
         const mappedProducts = fetchedProducts._embedded.productos.map((product) => ({
           id: product.id,
           title: product.nombre,
           price: product.precio,
           description: product.descripcion,
-          image: null, 
-          rating: 4
+          image: null,
+          rating: 4,
         }));
 
-        
         for (const mappedProduct of mappedProducts) {
           const image = await getProductImage(mappedProduct.id);
-          mappedProduct.image = image || 'https://placehold.co/600x400'; 
+          mappedProduct.image = image || 'https://placehold.co/600x400';
         }
 
         setProducts(mappedProducts);
@@ -89,50 +86,46 @@ const ProductsPage = () => {
     navigate('/group-chat');
   };
 
-  const handleSearch = () => {
-    setCurrentPage(1);
-  };
-
   return (
     <div className="min-h-screen bg-gray-100">
       {/* Navbar */}
       <nav className="bg-white shadow mb-8">
-        <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-          <div className="flex items-center gap-4">
+        <div className="container mx-auto px-4 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
+          <div className="flex items-center gap-2 flex-wrap">
             <h1
-              className="text-2xl font-bold text-blue-600 cursor-pointer"
+              className="text-xl sm:text-2xl font-bold text-blue-600 cursor-pointer"
               onClick={() => navigate('/products-page')}
             >
               Tienda Virtual
             </h1>
             <button
-              className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
+              className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 text-sm sm:text-base"
               onClick={() => navigate('/sell-product')}
             >
               Vender un producto
             </button>
             <button
-              className="bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600"
+              className="bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600 text-sm sm:text-base"
               onClick={handleMyProducts}
             >
               Ver mis productos
             </button>
             <button
-              className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+              className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 text-sm sm:text-base"
               onClick={handleMyOrders}
             >
               Mis pedidos
             </button>
             <button
-              className="bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600"
+              className="bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600 text-sm sm:text-base"
               onClick={handleGroupChat}
             >
               Chat grupal
             </button>
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 flex-wrap">
             <select
-              className="border border-gray-300 rounded px-4 py-2"
+              className="border border-gray-300 rounded px-2 py-1 sm:px-4 sm:py-2 text-sm sm:text-base"
               value={sortOption}
               onChange={(e) => setSortOption(e.target.value)}
             >
@@ -143,16 +136,10 @@ const ProductsPage = () => {
             <input
               type="text"
               placeholder="Buscar productos..."
-              className="border border-gray-300 rounded px-4 py-2 w-64"
+              className="border border-gray-300 rounded px-2 py-1 sm:px-4 sm:py-2 w-40 sm:w-64 text-sm sm:text-base"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
-            <button
-              className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700"
-              onClick={handleSearch}
-            >
-              Buscar
-            </button>
           </div>
         </div>
       </nav>
@@ -172,28 +159,27 @@ const ProductsPage = () => {
             No se encontraron productos
           </div>
         ) : (
-          <>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {currentProducts.map((product) => (
-                <ProductCard
-                  key={product.id}
-                  product={{
-                    ...product,
-                    image: product.image, 
-                  }}
-                  onDetailsClick={() => navigate(`/product-detail/${product.id}`, { state: { product } })}
-                />
-              ))}
-            </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {currentProducts.map((product) => (
+              <ProductCard
+                key={product.id}
+                product={product}
+                onDetailsClick={() =>
+                  navigate(`/product-detail/${product.id}`, { state: { product } })
+                }
+              />
+            ))}
+          </div>
+        )}
 
-            {/* Paginación */}
-            <Pagination
-              currentPage={currentPage}
-              productsPerPage={productsPerPage}
-              totalProducts={filteredAndSortedProducts.length}
-              paginate={paginate}
-            />
-          </>
+        {/* Paginación */}
+        {filteredAndSortedProducts.length > 0 && (
+          <Pagination
+            currentPage={currentPage}
+            productsPerPage={productsPerPage}
+            totalProducts={filteredAndSortedProducts.length}
+            paginate={paginate}
+          />
         )}
       </div>
     </div>

@@ -193,3 +193,26 @@ export const createProduct = async (productData) => {
       return responseBody;
     }
   };
+
+  export const createOrder = async (pedido) => {
+    try {
+      const response = await fetch(`${API}/data-api/pedidos`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(pedido),
+      });
+  
+      if (!response.ok) {
+        throw new Error('Error al crear el pedido');
+      }
+  
+      const createdOrder = await response.json();
+      return createdOrder;
+    } catch (error) {
+      console.error('Error en createOrder:', error);
+      throw error;
+    }
+  };
+  
