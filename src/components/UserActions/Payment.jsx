@@ -124,6 +124,13 @@ export const Payment = () => {
         <img src={visaImg} alt="visa" className="h-8" />
         <img src={mastercardImg} alt="mastercard" className="h-8" />
       </div>
+
+      <button
+        onClick={() => navigate('/products-page')}
+        className="mt-6 w-full bg-gray-600 text-white px-6 py-2 rounded hover:bg-gray-700 text-center"
+      >
+        Volver a la tienda
+      </button>
     </div>
   );
 };
