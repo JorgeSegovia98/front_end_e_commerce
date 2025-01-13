@@ -24,11 +24,12 @@ jobs:
       - name: Install dependencies and build project
         run: |
           npm install
-          npm run build --if-present
+          npm run build
 
-      - name: Zip the dist folder for deployment
+      - name: Zip build directory for deployment
         run: |
-          zip -r release.zip dist
+          cd dist
+          zip -r ../release.zip .
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
@@ -57,9 +58,9 @@ jobs:
       - name: Login to Azure
         uses: azure/login@v2
         with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_93769CC958584D81AC343E33E2220388 }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_5D89E0B26D6C4D47A77F7BF7958DF6BB }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_93E5E9EB6ED34C469B547320EFAECDFE }}
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID }}
 
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
