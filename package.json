@@ -21,7 +21,7 @@
     "test:ui": "vitest --ui",
     "lint": "eslint src --max-warnings=0",
     "typecheck": "tsc --project tsconfig.json --noEmit",
-    "start": "serve -s dist"
+    "start": "serve -s dist -l 8080"
   },
   "dependencies": {
     "@stomp/stompjs": "^7.0.0",
