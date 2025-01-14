@@ -4,6 +4,7 @@ import { ProductCard } from './ProductCard';
 import { Pagination } from './Pagination';
 import { getAllProducts, getProductImage } from 'services/ApiService';
 import { useCart } from '../CartLogic/CartContext';
+import DOMPurify from 'dompurify';
 
 const ProductsPage = () => {
   const [products, setProducts] = useState([]);
@@ -138,8 +139,9 @@ const ProductsPage = () => {
               placeholder="Buscar productos..."
               className="border border-gray-300 rounded px-2 py-1 sm:px-4 sm:py-2 w-40 sm:w-64 text-sm sm:text-base"
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
+               onChange={(e) => setSearch(DOMPurify.sanitize(e.target.value))}
             />
+
           </div>
         </div>
       </nav>
