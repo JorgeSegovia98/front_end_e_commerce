@@ -4,60 +4,115 @@ import { Logo } from "../Logo";
 import { Input } from "./Input";
 import { Button } from "./Button";
 import { register } from "services/ApiService"; // Importamos la función register
+import DOMPurify from "dompurify";
+
+// Función para sanitizar las entradas usando DOMPurify
+const sanitizeInput = (input) => {
+  return DOMPurify.sanitize(input);
+};
 
 export default function RegisterPage() {
   const [formData, setFormData] = useState({
-    username: '',
-    email: '',
-    address: '',
-    phone: '',
-    password: '',
-    confirmPassword: '',
-    securityQuestion: '',
-    securityAnswer: ''
+    username: "",
+    email: "",
+    address: "",
+    phone: "",
+    password: "",
+    confirmPassword: "",
+    securityQuestion: "",
+    securityAnswer: ""
   });
 
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const navigate = useNavigate();
 
   const securityQuestions = [
     "¿Cuál es tu fruta favorita?",
-    "¿Cual es el nombre de tu primer mascota?", 
-    "¿Cual es el nombre de tu pokemon favorito?"
+    "¿Cuál es el nombre de tu primer mascota?",
+    "¿Cuál es el nombre de tu Pokémon favorito?"
   ];
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prevState => ({
+    setFormData((prevState) => ({
       ...prevState,
-      [name]: value
+      [name]: sanitizeInput(value)
     }));
+  };
+
+  // Función para validar si todos los campos están llenos
+  const areAllFieldsFilled = () => {
+    return Object.values(formData).every((value) => value.trim() !== "");
+  };
+
+  // Validación adicional para el email
+  const isEmailValid = (email) => {
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    return emailRegex.test(email);
+  };
+
+  // Validación adicional para el teléfono
+  const isPhoneValid = (phone) => {
+    const phoneRegex = /^[0-9]{10,15}$/;
+    return phoneRegex.test(phone);
+  };
+
+  // Función para validar la seguridad de la contraseña
+  const isPasswordSecure = (password) => {
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    return passwordRegex.test(password);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Validaciones
+    // Validar que todos los campos estén llenos
+    if (!areAllFieldsFilled()) {
+      setError("Por favor llena todos los campos.");
+      return;
+    }
+
+    // Validar el formato del email
+    if (!isEmailValid(formData.email)) {
+      setError("Por favor ingresa un correo electrónico válido.");
+      return;
+    }
+
+    // Validar el formato del teléfono
+    if (!isPhoneValid(formData.phone)) {
+      setError("Por favor ingresa un número de teléfono válido.");
+      return;
+    }
+
+    // Validar que las contraseñas coincidan
     if (formData.password !== formData.confirmPassword) {
-      setError("Las contraseñas no coinciden");
+      setError("Las contraseñas no coinciden.");
+      return;
+    }
+
+    // Validar que la contraseña sea segura
+    if (!isPasswordSecure(formData.password)) {
+      setError(
+        "La contraseña debe tener al menos 8 caracteres, incluyendo una letra mayúscula, una letra minúscula, un número y un carácter especial."
+      );
       return;
     }
 
     // Llamamos a la función register desde el servicio
     const response = await register(
-      formData.username, 
-      formData.password, 
-      formData.email, 
-      formData.address, 
+      formData.username,
+      formData.password,
+      formData.email,
+      formData.address,
       formData.phone,
       formData.securityAnswer
     );
 
     if (response === true) {
-      setError(''); // Limpiamos cualquier mensaje de error previo
-      navigate('/'); // Redirigimos a la página de login
+      setError(""); // Limpiamos cualquier mensaje de error previo
+      navigate("/"); // Redirigimos a la página de login
     } else {
-      setError(response.message || 'Ha ocurrido un error al registrar la cuenta'); // Mostramos el error si ocurrió
+      setError(response.message || "Ha ocurrido un error al registrar la cuenta"); // Mostramos el error si ocurrió
     }
   };
 
@@ -67,7 +122,7 @@ export default function RegisterPage() {
         <Logo />
         <h1 className="text-2xl font-bold text-gray-800 text-center">Crea una cuenta</h1>
         <p className="text-gray-500 text-center">¡Únete y explora nuestros productos!</p>
-        
+
         <form onSubmit={handleSubmit} className="space-y-4">
           {error && (
             <div className="text-red-500 text-sm text-center">
@@ -104,7 +159,7 @@ export default function RegisterPage() {
                 required
               />
             </div>
-            
+
             <div className="space-y-4">
               <Input
                 label="Teléfono"
@@ -136,7 +191,6 @@ export default function RegisterPage() {
             </div>
           </div>
 
-          {/* Security Question Section */}
           <div className="grid grid-cols-2 gap-4 mt-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -174,7 +228,7 @@ export default function RegisterPage() {
             <Button type="submit" text="Registrarse" className="w-full" />
           </div>
         </form>
-        
+
         <div className="text-sm text-center text-gray-500">
           ¿Ya tienes una cuenta? {" "}
           <Link to="/" className="text-teal-600 hover:underline">
