@@ -4,8 +4,9 @@ import { Logo } from "../Logo";
 import { Input } from "./Input";
 import { Button } from "./Button";
 import { changePassword } from "services/ApiService";
-const API = 'https://backend-ecommerse-b6anfne4gqgacyc5.canadacentral-01.azurewebsites.net';
+import DOMPurify from "dompurify";
 
+const API = 'https://backend-ecommerse-b6anfne4gqgacyc5.canadacentral-01.azurewebsites.net';
 
 export default function ForgotPassword() {
   const [step, setStep] = useState(1);
@@ -20,32 +21,34 @@ export default function ForgotPassword() {
   const handleSecurityQuestionSubmit = async (e) => {
     e.preventDefault();
     setError('');
-  
+
     try {
-      const response = await fetch(`${API}/data-api/usuarios?username=${encodeURIComponent(username)}`, {
+      const sanitizedUsername = DOMPurify.sanitize(username);
+
+      const response = await fetch(`${API}/data-api/usuarios?username=${encodeURIComponent(sanitizedUsername)}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
         },
       });
-  
+
       if (!response.ok) {
         throw new Error('Usuario no encontrado.');
       }
-  
+
       const data = await response.json();
       // Find the user with the matching username
-      const user = data._embedded.usuarios.find(u => u.username === username);
-  
+      const user = data._embedded.usuarios.find(u => u.username === sanitizedUsername);
+
       if (!user) {
         throw new Error('Usuario no encontrado.');
       }
-  
+
       console.log(user.preguntaSeguridad); // This should now work
-  
+
       if (
         user.preguntaSeguridad &&
-        user.preguntaSeguridad.trim() === securityAnswer.trim()
+        user.preguntaSeguridad.trim() === DOMPurify.sanitize(securityAnswer.trim())
       ) {
         setStep(2);
       } else {
@@ -69,7 +72,9 @@ export default function ForgotPassword() {
       return;
     }
 
-    const changePasswordResponse = await changePassword(username, newPassword);
+    const sanitizedNewPassword = DOMPurify.sanitize(newPassword);
+
+    const changePasswordResponse = await changePassword(username, sanitizedNewPassword);
 
     if (changePasswordResponse) {
       alert('Contraseña actualizada exitosamente.');
@@ -98,7 +103,7 @@ export default function ForgotPassword() {
                 name="username"
                 placeholder="Tu nombre de usuario"
                 value={username}
-                onChange={(e) => setUsername(e.target.value)}
+                onChange={(e) => setUsername(DOMPurify.sanitize(e.target.value))}
                 required
               />
               <Input
@@ -107,7 +112,7 @@ export default function ForgotPassword() {
                 name="securityAnswer"
                 placeholder="Ingresa tu respuesta"
                 value={securityAnswer}
-                onChange={(e) => setSecurityAnswer(e.target.value)}
+                onChange={(e) => setSecurityAnswer(DOMPurify.sanitize(e.target.value))}
                 required
               />
               <Button type="submit" text="Siguiente" />
@@ -128,7 +133,7 @@ export default function ForgotPassword() {
                 name="newPassword"
                 placeholder="••••••••"
                 value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
+                onChange={(e) => setNewPassword(DOMPurify.sanitize(e.target.value))}
                 required
               />
               <Input
@@ -137,7 +142,7 @@ export default function ForgotPassword() {
                 name="confirmPassword"
                 placeholder="••••••••"
                 value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
+                onChange={(e) => setConfirmPassword(DOMPurify.sanitize(e.target.value))}
                 required
               />
               <Button type="submit" text="Guardar Contraseña" />

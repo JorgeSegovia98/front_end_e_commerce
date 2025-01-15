@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createProduct, uploadImage } from 'services/ApiService'; 
-import { getCookie } from "utils/Cookies"
-
+import { getCookie } from "utils/Cookies";
+import DOMPurify from "dompurify";
 
 export const SellProduct = () => {
   const idUsuarioCookie = getCookie("id_usuario");
@@ -25,32 +25,31 @@ export const SellProduct = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
-    
+
+    const sanitizedProductName = DOMPurify.sanitize(productName);
+    const sanitizedDescription = DOMPurify.sanitize(description);
+
     const productData = {
-      nombre: productName,
+      nombre: sanitizedProductName,
       precio: parseFloat(price),
-      descripcion: description,
+      descripcion: sanitizedDescription,
       usuario: { id_usuario: parseInt(idUsuarioCookie, 10) },
     };
-  
+
     try {
-      
       const createdProduct = await createProduct(productData);
-      
+
       if (image) {
         await uploadImage(createdProduct.id, image); 
       }
-  
+
       navigate('/products-page'); 
     } catch (error) {
-      console.log(error)
+      console.log(error);
       setError('Hubo un error al publicar el producto. Intenta de nuevo.');
     }
   };
 
-  
-  
   return (
     <div className="min-h-screen bg-gray-100">
       {/* Navbar */}
@@ -84,7 +83,7 @@ export const SellProduct = () => {
               type="text"
               id="productName"
               value={productName}
-              onChange={(e) => setProductName(e.target.value)}
+              onChange={(e) => setProductName(DOMPurify.sanitize(e.target.value))}
               className="w-full px-3 py-2 border border-gray-300 rounded-md"
               required
             />
@@ -113,7 +112,7 @@ export const SellProduct = () => {
             <textarea
               id="description"
               value={description}
-              onChange={(e) => setDescription(e.target.value)}
+              onChange={(e) => setDescription(DOMPurify.sanitize(e.target.value))}
               className="w-full px-3 py-2 border border-gray-300 rounded-md"
               rows="4"
               required
@@ -151,4 +150,3 @@ export const SellProduct = () => {
     </div>
   );
 };
-

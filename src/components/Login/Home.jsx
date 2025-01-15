@@ -5,6 +5,7 @@ import { Input } from "./Input";
 import { Button } from "./Button";
 import { login } from "../../services/ApiService";
 import { setCookie } from "../../utils/Cookies";
+import DOMPurify from "dompurify";
 
 export default function Home() {
   const [username, setUsername] = useState('');
@@ -15,15 +16,18 @@ export default function Home() {
   const handleLogin = async (e) => {
     e.preventDefault();
 
-    if (username.includes('@')) {
+    const sanitizedUsername = DOMPurify.sanitize(username);
+
+    if (sanitizedUsername.includes('@')) {
       setError("El nombre de usuario no debe contener el carácter '@'.");
       return;
     }
 
     try {
-      const token = await login(username, password);
+      const sanitizedPassword = DOMPurify.sanitize(password);
+      const token = await login(sanitizedUsername, sanitizedPassword);
       if (token) {
-        setCookie('username', username);
+        setCookie('username', sanitizedUsername);
         setError('');
         navigate('/products-page');
       }
@@ -50,7 +54,7 @@ export default function Home() {
             name="username"
             placeholder="Tu nombre de usuario"
             value={username}
-            onChange={(e) => setUsername(e.target.value)}
+            onChange={(e) => setUsername(DOMPurify.sanitize(e.target.value))}
           />
           <Input
             label="Contraseña"
@@ -58,7 +62,7 @@ export default function Home() {
             name="password"
             placeholder="••••••••"
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={(e) => setPassword(DOMPurify.sanitize(e.target.value))}
           />
           <div className="text-right">
             <Link to="/forgot-password" className="text-sm text-indigo-600 hover:underline">
