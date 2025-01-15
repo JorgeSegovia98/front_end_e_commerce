@@ -3,11 +3,10 @@ import { Link, useNavigate } from "react-router-dom";
 import { Logo } from "../Logo";
 import { Input } from "./Input";
 import { Button } from "./Button";
-import { login } from "services/ApiService";
-import {setCookie} from "utils/Cookies"
+import { login } from "../../services/ApiService";
+import { setCookie } from "../../utils/Cookies";
 
 export default function Home() {
-
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -21,15 +20,15 @@ export default function Home() {
       return;
     }
 
-    
-    const success = await login(username, password);
-
-    if (success) {
-      setCookie('username', username);
-      setError('');  
-      navigate('/products-page');  
-    } else {
-      setError('Ha ocurrido un error al momento de iniciar sesión');  
+    try {
+      const token = await login(username, password);
+      if (token) {
+        setCookie('username', username);
+        setError('');
+        navigate('/products-page');
+      }
+    } catch (error) {
+      setError('Ha ocurrido un error al momento de iniciar sesión');
     }
   };
 
