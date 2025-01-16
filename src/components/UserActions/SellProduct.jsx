@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { createProductWithImage } from 'services/ApiService';
+import { createProductWithImage,createProduct,uploadImage } from 'services/ApiService';
 import { getCookie } from 'utils/Cookies';
 import DOMPurify from 'dompurify';
 
@@ -46,28 +46,35 @@ console.log("ID del usuario:", userId);
   // Manejo del envío del formulario
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     const sanitizedProductName = DOMPurify.sanitize(productName);
     const sanitizedDescription = DOMPurify.sanitize(description);
-
+  
     const productData = {
       nombre: sanitizedProductName,
       precio: parseFloat(price),
       descripcion: sanitizedDescription,
-      usuario: { id: parseInt(userId, 10) }, // Incluye el ID del usuario
+      usuario: { id: userId }, // ID extraído del token
     };
-
+  
     try {
-      // Llama a la función para crear el producto con la imagen
-      const createdProduct = await createProductWithImage(productData, image);
-
+      // Paso 1: Crear el producto
+      const createdProduct = await createProduct(productData);
       console.log('Producto creado:', createdProduct);
-      navigate('/products-page'); // Navega a la página de productos
+  
+      // Paso 2: Subir la imagen si existe
+      if (image) {
+        await uploadImage(createdProduct.id, image);
+        console.log('Imagen subida exitosamente');
+      }
+  
+      navigate('/products-page');
     } catch (error) {
-      console.error('Error al crear el producto:', error);
+      console.error('Error al publicar el producto:', error);
       setError('Hubo un error al publicar el producto. Intenta de nuevo.');
     }
   };
+  
+  
 
   return (
     <div className="min-h-screen bg-gray-100">
