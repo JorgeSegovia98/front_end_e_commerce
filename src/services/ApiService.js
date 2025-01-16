@@ -2,6 +2,7 @@ import { setCookie, getCookie } from "utils/Cookies";
 
 const API = 'https://backend-ecommerse-b6anfne4gqgacyc5.canadacentral-01.azurewebsites.net';
 
+// Función para establecer el token JWT
 export async function login(username, password) {
   try {
     const response = await fetch(`${API}/login`, {
@@ -16,8 +17,9 @@ export async function login(username, password) {
     });
 
     if (response.status === 200) {
-      const token = await response.text();
-      setCookie("jwt_token", token);
+      const token = await response.text(); // El token se devuelve como texto
+      setCookie("jwt_token", token); // Guardamos el token en cookies
+      console.log("Token recibido y guardado:", token);
       return true;
     } else {
       return false;
@@ -28,13 +30,28 @@ export async function login(username, password) {
   }
 }
 
+// Función para obtener el encabezado de autorización
+function getAuthHeaders() {
+  const token = getCookie('jwt_token'); // Obtén el token de las cookies
+  if (!token) {
+    console.error("No se encontró el token JWT en las cookies.");
+    return {};
+  }
+
+  return {
+    'Authorization': `Bearer ${token}`, // Encabezado con el token
+    'Content-Type': 'application/json',
+  };
+}
+
+// Función para obtener el usuario autenticado desde el token
 export function getAuthenticatedUser() {
   const token = getCookie('jwt_token');
   if (!token) return null;
 
   try {
-    const payload = JSON.parse(atob(token.split('.')[1]));
-    return payload.sub;
+    const payload = JSON.parse(atob(token.split('.')[1])); // Decodificamos el JWT
+    return payload.sub; // Supongamos que "sub" es el ID del usuario
   } catch (error) {
     console.error('Error al decodificar el token:', error);
     return null;
@@ -126,9 +143,7 @@ export const createProduct = async (productData) => {
   try {
     const response = await fetch(`${API}/data-api/productos`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: getAuthHeaders(), // Incluimos el token aquí también
       body: JSON.stringify({
         nombre: productData.nombre,
         precio: productData.precio,
@@ -138,50 +153,73 @@ export const createProduct = async (productData) => {
     });
 
     if (!response.ok) {
+      const errorDetails = await response.text(); // Captura detalles del error
+      console.error('Error del servidor:', errorDetails);
       throw new Error('Error al crear el producto');
     }
 
-    const createdProduct = await response.json();
-    return createdProduct;
+    return await response.json();
   } catch (error) {
     console.error('Error en createProduct:', error);
     throw error;
   }
 };
 
+// Ejemplo: Obtener todos los productos
 export const getAllProducts = async () => {
-  const response = await fetch(`${API}/data-api/productos`);
-  if (!response.ok) {
-    throw new Error('Error al obtener productos');
+  try {
+    const response = await fetch(`${API}/data-api/productos`, {
+      method: 'GET',
+      headers: getAuthHeaders(), // Incluimos el encabezado con el token
+    });
+
+    if (!response.ok) {
+      throw new Error(`Error al obtener productos: ${response.status}`);
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Error durante la solicitud de productos:', error);
+    throw error;
   }
-  return await response.json();
 };
 
+// Obtener la URL de la imagen de un producto por su ID
 export async function getProductImage(productId) {
   try {
     const response = await fetch(`${API}/productos/imagen/${productId}`, {
       method: 'GET',
+      headers: {
+        Authorization: `Bearer ${getCookie('jwt_token')}`, // Incluye el token JWT
+      },
     });
 
     if (response.ok) {
       const blob = await response.blob();
-      return URL.createObjectURL(blob);
+      return URL.createObjectURL(blob); // Convierte el blob a una URL utilizable
     } else {
       console.error(`Error al obtener la imagen para el producto ${productId}`);
       return null;
     }
   } catch (error) {
-    console.error(`Error al conectar con el servidor para obtener la imagen del producto ${productId}:`, error);
+    console.error(
+      `Error al conectar con el servidor para obtener la imagen del producto ${productId}:`,
+      error
+    );
     return null;
   }
 }
 
+// Subir la imagen de un producto
 export const uploadImage = async (productId, file) => {
   const formData = new FormData();
-  formData.append("file", file);
+  formData.append('file', file);
 
   const response = await fetch(`${API}/productos/upload/${productId}`, {
     method: 'POST',
+    headers: {
+      Authorization: `Bearer ${getCookie('jwt_token')}`, // Incluye el token JWT
+    },
     body: formData,
   });
 
@@ -193,11 +231,56 @@ export const uploadImage = async (productId, file) => {
   }
 
   try {
-    return JSON.parse(responseBody);
+    return JSON.parse(responseBody); // Intenta parsear la respuesta como JSON
   } catch (error) {
-    return responseBody;
+    return responseBody; // Si falla, devuelve el cuerpo de la respuesta como está
   }
 };
+
+// Crear producto con imagen
+export const createProductWithImage = async (productData, file) => {
+  try {
+    // FormData para manejar datos y la imagen
+    const formData = new FormData();
+    formData.append('nombre', productData.nombre);
+    formData.append('precio', productData.precio);
+    formData.append('descripcion', productData.descripcion);
+    formData.append('usuario', JSON.stringify(productData.usuario)); // Serializa el usuario como JSON
+
+    if (file) {
+      formData.append('imagen', file); // Añade la imagen al FormData
+    }
+
+    console.log('Datos enviados:', {
+      nombre: productData.nombre,
+      precio: productData.precio,
+      descripcion: productData.descripcion,
+      usuario: JSON.stringify(productData.usuario),
+      imagen: file ? file.name : null,
+    });
+
+    const response = await fetch(`${API}/data-api/productos`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${getCookie('jwt_token')}`, // Incluye el token JWT
+      },
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const errorDetails = await response.text();
+      console.error('Error del servidor:', errorDetails);
+      throw new Error('Error al crear el producto');
+    }
+
+    return await response.json(); // Devuelve el producto creado
+  } catch (error) {
+    console.error('Error en createProductWithImage:', error);
+    throw error;
+  }
+};
+
+
 
 export const createOrder = async (pedido) => {
   try {

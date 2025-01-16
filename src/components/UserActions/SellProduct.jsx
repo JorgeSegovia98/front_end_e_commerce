@@ -1,28 +1,49 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { createProduct, uploadImage } from 'services/ApiService'; 
-import { getCookie } from "utils/Cookies";
-import DOMPurify from "dompurify";
+import { createProductWithImage } from 'services/ApiService';
+import { getCookie } from 'utils/Cookies';
+import DOMPurify from 'dompurify';
 
 export const SellProduct = () => {
-  const idUsuarioCookie = getCookie("id_usuario");
+  // Función para decodificar el JWT manualmente
+const decodeToken = (token) => {
+  try {
+    const payloadBase64 = token.split('.')[1]; // Obtiene la segunda parte del token
+    const payloadDecoded = atob(payloadBase64); // Decodifica la base64
+    return JSON.parse(payloadDecoded); // Convierte a objeto JSON
+  } catch (error) {
+    console.error("Error al decodificar el token:", error);
+    return null;
+  }
+};
+
+// Obtén el token de la cookie
+const token = getCookie('jwt_token');
+let userId = null;
+
+if (token) {
+  const decoded = decodeToken(token); // Decodifica el token
+  userId = decoded?.sub || null; // Extrae el campo `sub` (ID del usuario)
+}
+
+console.log("ID del usuario:", userId);
+
   const [productName, setProductName] = useState('');
   const [price, setPrice] = useState('');
   const [description, setDescription] = useState('');
-  const [image, setImage] = useState(null); 
-  const [imageBlob, setImageBlob] = useState(null); 
+  const [image, setImage] = useState(null); // Imagen seleccionada
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
+  // Manejo del cambio de imagen
   const handleImageChange = (e) => {
     const file = e.target.files[0];
-
     if (file) {
-      setImage(file); 
-      setImageBlob(file); 
+      setImage(file); // Guarda la imagen seleccionada
     }
   };
 
+  // Manejo del envío del formulario
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -33,26 +54,23 @@ export const SellProduct = () => {
       nombre: sanitizedProductName,
       precio: parseFloat(price),
       descripcion: sanitizedDescription,
-      usuario: { id_usuario: parseInt(idUsuarioCookie, 10) },
+      usuario: { id: parseInt(userId, 10) }, // Incluye el ID del usuario
     };
 
     try {
-      const createdProduct = await createProduct(productData);
+      // Llama a la función para crear el producto con la imagen
+      const createdProduct = await createProductWithImage(productData, image);
 
-      if (image) {
-        await uploadImage(createdProduct.id, image); 
-      }
-
-      navigate('/products-page'); 
+      console.log('Producto creado:', createdProduct);
+      navigate('/products-page'); // Navega a la página de productos
     } catch (error) {
-      console.log(error);
+      console.error('Error al crear el producto:', error);
       setError('Hubo un error al publicar el producto. Intenta de nuevo.');
     }
   };
 
   return (
     <div className="min-h-screen bg-gray-100">
-      {/* Navbar */}
       <nav className="bg-white shadow mb-8">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
           <h1
@@ -64,7 +82,6 @@ export const SellProduct = () => {
         </div>
       </nav>
 
-      {/* Sell Product Form */}
       <div className="container mx-auto px-4 py-8">
         <form onSubmit={handleSubmit} className="max-w-md mx-auto bg-white p-8 rounded-lg shadow-md">
           <h2 className="text-2xl font-bold mb-6 text-center">Vender Producto</h2>
@@ -76,7 +93,7 @@ export const SellProduct = () => {
           )}
 
           <div className="mb-4">
-            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="productName">
+            <label htmlFor="productName" className="block text-gray-700 text-sm font-bold mb-2">
               Nombre del Producto
             </label>
             <input
@@ -90,7 +107,7 @@ export const SellProduct = () => {
           </div>
 
           <div className="mb-4">
-            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="price">
+            <label htmlFor="price" className="block text-gray-700 text-sm font-bold mb-2">
               Precio
             </label>
             <input
@@ -106,7 +123,7 @@ export const SellProduct = () => {
           </div>
 
           <div className="mb-4">
-            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="description">
+            <label htmlFor="description" className="block text-gray-700 text-sm font-bold mb-2">
               Descripción
             </label>
             <textarea
@@ -120,7 +137,7 @@ export const SellProduct = () => {
           </div>
 
           <div className="mb-4">
-            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="image">
+            <label htmlFor="image" className="block text-gray-700 text-sm font-bold mb-2">
               Imagen del Producto
             </label>
             <input
@@ -133,7 +150,7 @@ export const SellProduct = () => {
             {image && (
               <img
                 src={URL.createObjectURL(image)}
-                alt="Preview"
+                alt="Vista previa"
                 className="mt-4 w-full h-48 object-cover rounded-md"
               />
             )}
