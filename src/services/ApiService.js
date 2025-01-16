@@ -58,7 +58,7 @@ export function getAuthenticatedUser() {
   }
 }
 
-export async function changePassword(username, newPassword) {
+export async function changePassword(username, newPassword, securityAnswer) {
   try {
     const response = await fetch(`${API}/cambiar-contrasena`, {
       method: 'PATCH',
@@ -66,21 +66,25 @@ export async function changePassword(username, newPassword) {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        username: username,
-        nuevaContrasena: newPassword,
+        username: username, // Nombre de usuario
+        nuevaContrasena: newPassword, // Nueva contraseña
+        preguntaSeguridad: securityAnswer, // Respuesta de seguridad
       }),
     });
 
     if (response.status === 200) {
-      return true;
+      return true; // Contraseña actualizada correctamente
     } else {
+      const errorDetails = await response.text();
+      console.error('Error al cambiar la contraseña:', errorDetails);
       return false;
     }
   } catch (error) {
-    console.error('Error durante el cambio de contraseña:', error);
+    console.error('Error en changePassword:', error);
     return false;
   }
 }
+
 
 export async function register(username, password, correo, direccion, telefono, preguntaSeguridad) {
   try {
