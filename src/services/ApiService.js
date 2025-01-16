@@ -143,27 +143,35 @@ export const createProduct = async (productData) => {
   try {
     const response = await fetch(`${API}/data-api/productos`, {
       method: 'POST',
-      headers: getAuthHeaders(), // Incluimos el token aquí también
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${getCookie('jwt_token')}`, // Incluye el token JWT
+      },
       body: JSON.stringify({
         nombre: productData.nombre,
         precio: productData.precio,
         descripcion: productData.descripcion,
-        usuario: productData.usuario,
+        imagen: null, // Backend espera este valor explícitamente
+        usuario: {
+          id_usuario: productData.usuario.id, // Asegúrate de enviar "id_usuario"
+        },
       }),
     });
 
     if (!response.ok) {
-      const errorDetails = await response.text(); // Captura detalles del error
+      const errorDetails = await response.text();
       console.error('Error del servidor:', errorDetails);
       throw new Error('Error al crear el producto');
     }
 
-    return await response.json();
+    return await response.json(); // Devuelve el producto creado
   } catch (error) {
     console.error('Error en createProduct:', error);
     throw error;
   }
 };
+
+
 
 // Ejemplo: Obtener todos los productos
 export const getAllProducts = async () => {
@@ -215,51 +223,8 @@ export const uploadImage = async (productId, file) => {
   const formData = new FormData();
   formData.append('file', file);
 
-  const response = await fetch(`${API}/productos/upload/${productId}`, {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${getCookie('jwt_token')}`, // Incluye el token JWT
-    },
-    body: formData,
-  });
-
-  const responseBody = await response.text();
-
-  if (!response.ok) {
-    console.error('Error al subir la imagen:', responseBody);
-    throw new Error('Error al subir la imagen');
-  }
-
   try {
-    return JSON.parse(responseBody); // Intenta parsear la respuesta como JSON
-  } catch (error) {
-    return responseBody; // Si falla, devuelve el cuerpo de la respuesta como está
-  }
-};
-
-// Crear producto con imagen
-export const createProductWithImage = async (productData, file) => {
-  try {
-    // FormData para manejar datos y la imagen
-    const formData = new FormData();
-    formData.append('nombre', productData.nombre);
-    formData.append('precio', productData.precio);
-    formData.append('descripcion', productData.descripcion);
-    formData.append('usuario', JSON.stringify(productData.usuario)); // Serializa el usuario como JSON
-
-    if (file) {
-      formData.append('imagen', file); // Añade la imagen al FormData
-    }
-
-    console.log('Datos enviados:', {
-      nombre: productData.nombre,
-      precio: productData.precio,
-      descripcion: productData.descripcion,
-      usuario: JSON.stringify(productData.usuario),
-      imagen: file ? file.name : null,
-    });
-
-    const response = await fetch(`${API}/data-api/productos`, {
+    const response = await fetch(`${API}/productos/upload/${productId}`, {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${getCookie('jwt_token')}`, // Incluye el token JWT
@@ -269,16 +234,54 @@ export const createProductWithImage = async (productData, file) => {
 
     if (!response.ok) {
       const errorDetails = await response.text();
-      console.error('Error del servidor:', errorDetails);
-      throw new Error('Error al crear el producto');
+      console.error('Error al subir la imagen:', errorDetails);
+      throw new Error('Error al subir la imagen');
+    }
+
+    console.log('Imagen subida exitosamente');
+    return await response.text(); // Devuelve un mensaje del servidor
+  } catch (error) {
+    console.error('Error en uploadImage:', error);
+    throw error;
+  }
+};
+
+
+
+// Crear producto con imagen
+export const createProductWithImage = async (productData, file) => {
+  const formData = new FormData();
+
+  formData.append("nombre", productData.nombre);
+  formData.append("precio", productData.precio);
+  formData.append("descripcion", productData.descripcion);
+  formData.append("usuario", JSON.stringify({ id: productData.usuario.id })); // Corrige el usuario
+  if (file) {
+    formData.append("imagen", file); // Adjunta la imagen si existe
+  }
+
+  try {
+    const response = await fetch(`${API}/data-api/productos`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${getCookie("jwt_token")}`, // Incluye el token JWT
+      },
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const errorDetails = await response.text();
+      console.error("Error del servidor:", errorDetails);
+      throw new Error("Error al crear el producto");
     }
 
     return await response.json(); // Devuelve el producto creado
   } catch (error) {
-    console.error('Error en createProductWithImage:', error);
+    console.error("Error en createProductWithImage:", error);
     throw error;
   }
 };
+
 
 
 
