@@ -4,6 +4,7 @@ import { ProductCard } from './ProductCard';
 import { Pagination } from './Pagination';
 import { getAllProducts, getProductImage } from 'services/ApiService';
 import { useCart } from '../CartLogic/CartContext';
+import { deleteAllCookies } from 'utils/Cookies';
 import DOMPurify from 'dompurify';
 
 const ProductsPage = () => {
@@ -22,7 +23,7 @@ const ProductsPage = () => {
       setIsLoading(true);
       try {
         const fetchedProducts = await getAllProducts();
-  
+
         const mappedProducts = fetchedProducts._embedded.productos.map((product) => ({
           id: product.id,
           title: product.nombre,
@@ -31,8 +32,7 @@ const ProductsPage = () => {
           image: null,
           rating: 4,
         }));
-  
-        // Cargar imágenes de productos con token
+
         for (const mappedProduct of mappedProducts) {
           try {
             const image = await getProductImage(mappedProduct.id);
@@ -41,7 +41,7 @@ const ProductsPage = () => {
             console.error(`Error al cargar la imagen del producto ${mappedProduct.id}:`, imageError);
           }
         }
-  
+
         setProducts(mappedProducts);
       } catch (error) {
         setError('Error al cargar los productos');
@@ -50,10 +50,9 @@ const ProductsPage = () => {
         setIsLoading(false);
       }
     };
-  
+
     fetchProducts();
   }, []);
-  
 
   const sortProducts = (productsToSort) => {
     switch (sortOption) {
@@ -93,6 +92,11 @@ const ProductsPage = () => {
     navigate('/group-chat');
   };
 
+  const handleLogout = () => {
+    deleteAllCookies();
+    navigate('/');
+  };
+
   return (
     <div className="min-h-screen bg-gray-100">
       {/* Navbar */}
@@ -130,7 +134,7 @@ const ProductsPage = () => {
               Chat grupal
             </button>
           </div>
-          <div className="flex items-center gap-2 flex-wrap">
+          <div className="flex items-center gap-2">
             <select
               className="border border-gray-300 rounded px-2 py-1 sm:px-4 sm:py-2 text-sm sm:text-base"
               value={sortOption}
@@ -145,9 +149,14 @@ const ProductsPage = () => {
               placeholder="Buscar productos..."
               className="border border-gray-300 rounded px-2 py-1 sm:px-4 sm:py-2 w-40 sm:w-64 text-sm sm:text-base"
               value={search}
-               onChange={(e) => setSearch(DOMPurify.sanitize(e.target.value))}
+              onChange={(e) => setSearch(DOMPurify.sanitize(e.target.value))}
             />
-
+            <button
+              className="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600 text-xs sm:text-sm"
+              onClick={handleLogout}
+            >
+              Cerrar sesión
+            </button>
           </div>
         </div>
       </nav>
