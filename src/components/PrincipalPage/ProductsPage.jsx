@@ -22,7 +22,7 @@ const ProductsPage = () => {
       setIsLoading(true);
       try {
         const fetchedProducts = await getAllProducts();
-
+  
         const mappedProducts = fetchedProducts._embedded.productos.map((product) => ({
           id: product.id,
           title: product.nombre,
@@ -31,12 +31,17 @@ const ProductsPage = () => {
           image: null,
           rating: 4,
         }));
-
+  
+        // Cargar imágenes de productos con token
         for (const mappedProduct of mappedProducts) {
-          const image = await getProductImage(mappedProduct.id);
-          mappedProduct.image = image || 'https://placehold.co/600x400';
+          try {
+            const image = await getProductImage(mappedProduct.id);
+            mappedProduct.image = image || 'https://placehold.co/600x400';
+          } catch (imageError) {
+            console.error(`Error al cargar la imagen del producto ${mappedProduct.id}:`, imageError);
+          }
         }
-
+  
         setProducts(mappedProducts);
       } catch (error) {
         setError('Error al cargar los productos');
@@ -45,9 +50,10 @@ const ProductsPage = () => {
         setIsLoading(false);
       }
     };
-
+  
     fetchProducts();
   }, []);
+  
 
   const sortProducts = (productsToSort) => {
     switch (sortOption) {

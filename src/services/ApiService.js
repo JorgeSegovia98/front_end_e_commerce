@@ -199,19 +199,23 @@ export const getAllProducts = async () => {
 // Obtener la URL de la imagen de un producto por su ID
 export async function getProductImage(productId) {
   try {
+    // Log para verificar el producto solicitado
+    console.log(`Solicitando imagen para el producto: ${productId}`);
+    
     const response = await fetch(`${API}/productos/imagen/${productId}`, {
       method: 'GET',
-      headers: {
-        Authorization: `Bearer ${getCookie('jwt_token')}`, // Incluye el token JWT
-      },
+      headers: getAuthHeaders(), // Incluye el token JWT aquí
     });
 
     if (response.ok) {
+      // Convierte la respuesta binaria a un objeto URL para usar como fuente de imagen
       const blob = await response.blob();
-      return URL.createObjectURL(blob); // Convierte el blob a una URL utilizable
+      return URL.createObjectURL(blob);
     } else {
-      console.error(`Error al obtener la imagen para el producto ${productId}`);
-      return null;
+      console.error(
+        `Error al obtener la imagen para el producto ${productId}: ${response.status} ${response.statusText}`
+      );
+      return null; // Devuelve `null` si la imagen no se puede cargar
     }
   } catch (error) {
     console.error(
@@ -221,6 +225,8 @@ export async function getProductImage(productId) {
     return null;
   }
 }
+
+
 
 // Subir la imagen de un producto
 export const uploadImage = async (productId, file) => {
