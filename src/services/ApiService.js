@@ -134,7 +134,7 @@ export async function getUserProducts() {
 
     const productos = await response.json(); // Procesa el JSON solo si hay contenido
     return productos.map((product) => ({
-      id: product.id_producto,
+      id: product.id,
       title: product.nombre,
       price: product.precio,
       description: product.descripcion,
