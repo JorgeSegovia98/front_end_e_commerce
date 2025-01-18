@@ -59,9 +59,9 @@ const MyProductsPage = () => {
             <div className="col-span-4 text-center text-gray-600 text-xl">
               No tienes productos registrados
             </div>
-          ) : (
-            currentProducts.map((product) => (
-              <div key={product.id} className="relative">
+          ) : 
+            currentProducts.map((product, index) => (
+              <div key={product.id || index} className="relative">
                 <ProductCard product={product} />
                 <button
                   className="absolute top-2 right-2 bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600"
@@ -71,7 +71,7 @@ const MyProductsPage = () => {
                 </button>
               </div>
             ))
-          )}
+          }
         </div>
 
         {/* Paginación */}
