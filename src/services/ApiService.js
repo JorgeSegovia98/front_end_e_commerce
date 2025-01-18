@@ -114,6 +114,7 @@ export async function register(username, password, correo, direccion, telefono, 
   }
 }
 
+// Obtener productos de usuario
 export async function getUserProducts() {
   try {
     const response = await fetch(`${API}/productos/usuario`, {
@@ -121,18 +122,11 @@ export async function getUserProducts() {
       headers: getAuthHeaders(),
     });
 
-    // Verifica si la respuesta es "No Content" (204) o vacía
-    if (response.status === 204 || response.status === 404 || response.headers.get('Content-Length') === '0') {
-      console.warn('No hay productos para este usuario.');
-      return []; // Devuelve un array vacío si no hay productos
-    }
-
     if (!response.ok) {
-      console.error(`Error al obtener productos: ${response.status}`);
-      return [];
+      throw new Error(`Error al obtener productos: ${response.status}`);
     }
 
-    const productos = await response.json(); // Procesa el JSON solo si hay contenido
+    const productos = await response.json();
     return productos.map((product) => ({
       id: product.id,
       title: product.nombre,
@@ -142,11 +136,32 @@ export async function getUserProducts() {
       rating: 4.0,
     }));
   } catch (error) {
-    console.error('Error durante la solicitud de productos:', error);
+    console.error('Error al obtener productos del usuario:', error);
     return [];
   }
 }
 
+// Editar un producto
+export async function editProduct(productId, formData) {
+  try {
+    const response = await fetch(`${API}/productos/editar/${productId}`, {
+      method: 'PATCH',
+      headers: getAuthHeaders(),
+      body: JSON.stringify(formData),
+    });
+
+    if (!response.ok) {
+      const errorDetails = await response.text();
+      console.error('Error del servidor:', errorDetails);
+      throw new Error('Error al editar el producto');
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Error al editar producto:', error);
+    throw error;
+  }
+}
 
 
 export const createProduct = async (productData) => {
