@@ -114,34 +114,40 @@ export async function register(username, password, correo, direccion, telefono, 
   }
 }
 
-export async function getUserProducts(userId) {
+export async function getUserProducts() {
   try {
-    const response = await fetch(`${API}/data-api/usuarios/${userId}/productos`, {
+    const response = await fetch(`${API}/productos/usuario`, {
       method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: getAuthHeaders(),
     });
 
-    if (response.ok) {
-      const data = await response.json();
-      return data._embedded.productos.map((product, index) => ({
-        id: index + 1,
-        title: product.nombre,
-        price: product.precio,
-        description: product.descripcion,
-        image: product.imagen || 'https://placehold.co/600x400',
-        rating: 4.0,
-      }));
-    } else {
+    // Verifica si la respuesta es "No Content" (204) o vacía
+    if (response.status === 204 || response.status === 404 || response.headers.get('Content-Length') === '0') {
+      console.warn('No hay productos para este usuario.');
+      return []; // Devuelve un array vacío si no hay productos
+    }
+
+    if (!response.ok) {
       console.error(`Error al obtener productos: ${response.status}`);
       return [];
     }
+
+    const productos = await response.json(); // Procesa el JSON solo si hay contenido
+    return productos.map((product) => ({
+      id: product.id_producto,
+      title: product.nombre,
+      price: product.precio,
+      description: product.descripcion,
+      image: product.imagen ? `data:image/png;base64,${product.imagen}` : 'https://placehold.co/600x400',
+      rating: 4.0,
+    }));
   } catch (error) {
     console.error('Error durante la solicitud de productos:', error);
     return [];
   }
 }
+
+
 
 export const createProduct = async (productData) => {
   try {

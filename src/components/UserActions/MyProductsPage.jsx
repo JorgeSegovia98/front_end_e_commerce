@@ -1,7 +1,6 @@
-// MyProductsPage.js
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ProductCard } from 'components/PrincipalPage//ProductCard';
+import { ProductCard } from 'components/PrincipalPage/ProductCard';
 import { Pagination } from 'components/PrincipalPage/Pagination';
 import { getUserProducts } from 'services/ApiService';
 
@@ -9,26 +8,17 @@ const MyProductsPage = () => {
   const [products, setProducts] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [search, setSearch] = useState('');
-  const [editingProduct, setEditingProduct] = useState(null);
   const navigate = useNavigate();
   const productsPerPage = 8;
 
-  // Obtener el userId desde localStorage o el contexto del usuario autenticado
-  const userId = 1; // Cambiar esto según la implementación de autenticación
-
-  // Obtener los productos del usuario desde la API
   useEffect(() => {
     const fetchUserProductsData = async () => {
-      if (userId) {
-        const userProducts = await getUserProducts(userId);
-        setProducts(userProducts);
-      } else {
-        console.error('No se encontró el userId');
-      }
+      const userProducts = await getUserProducts();
+      setProducts(userProducts);
     };
 
     fetchUserProductsData();
-  }, [userId]);
+  }, []);
 
   // Filtrado de productos según la búsqueda
   const filteredProducts = products.filter((product) =>
@@ -44,14 +34,7 @@ const MyProductsPage = () => {
 
   // Editar producto
   const handleEditProduct = (productId) => {
-    const productToEdit = products.find((product) => product.id === productId);
-    setEditingProduct(productToEdit);
     navigate(`/edit-product/${productId}`);
-  };
-
-  // Volver a la página de productos
-  const handleBackToProducts = () => {
-    navigate('/products-page');
   };
 
   return (
@@ -80,7 +63,7 @@ const MyProductsPage = () => {
             currentProducts.map((product) => (
               <div key={product.id} className="relative">
                 <ProductCard product={product} />
-                <button 
+                <button
                   className="absolute top-2 right-2 bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600"
                   onClick={() => handleEditProduct(product.id)}
                 >
