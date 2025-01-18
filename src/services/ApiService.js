@@ -31,7 +31,7 @@ export async function login(username, password) {
 }
 
 // Función para obtener el encabezado de autorización
-function getAuthHeaders() {
+export function getAuthHeaders() {
   const token = getCookie('jwt_token'); // Obtén el token de las cookies
   if (!token) {
     console.error("No se encontró el token JWT en las cookies.");

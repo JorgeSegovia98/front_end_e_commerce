@@ -1,4 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import { getAuthHeaders } from 'services/ApiService';
+
+const API = 'https://backend-ecommerse-b6anfne4gqgacyc5.canadacentral-01.azurewebsites.net';
 
 const MyOrdersPage = () => {
   const [orders, setOrders] = useState([]);
@@ -8,22 +11,30 @@ const MyOrdersPage = () => {
   useEffect(() => {
     const fetchOrders = async () => {
       try {
-        const response = await fetch('http://localhost:8080/data-api/usuario/pedidos');
+        const response = await fetch(`${API}/pedidos/usuario`, {
+          method: 'GET',
+          headers: getAuthHeaders(),
+        });
+
         if (!response.ok) {
           throw new Error('Error al cargar los pedidos');
         }
+
         const data = await response.json();
-        
-        // Map the orders to match the expected format
-        const mappedOrders = data._embedded.pedidos.map(order => ({
-          id: order.id,
-          total: order.total,
-          fecha: new Date(order.fecha).toLocaleDateString(),
-          productos: order.productos.map(producto => ({
-            id: producto.id,
-            nombre: producto.nombre,
-            precio: producto.precio
-          }))
+        console.log('Respuesta del servidor:', data);
+
+        if (!Array.isArray(data)) {
+          console.error('Formato de respuesta inesperado:', data);
+          setError('Error al procesar la información de pedidos');
+          setIsLoading(false);
+          return;
+        }
+
+        const mappedOrders = data.map(order => ({
+          id: order.id_pedido,
+          total: order.totalDinero,
+          fecha: new Date(order.fechaPedido).toLocaleDateString(),
+          productos: [], // Arreglo vacío porque no hay productos en la respuesta
         }));
 
         setOrders(mappedOrders);
@@ -69,19 +80,6 @@ const MyOrdersPage = () => {
                   <p className="text-lg font-semibold">Pedido #{order.id}</p>
                   <p className="text-gray-600">{order.fecha}</p>
                 </div>
-                
-                <div className="border-t pt-4">
-                  <h3 className="text-xl font-bold mb-3">Productos</h3>
-                  <div className="space-y-2">
-                    {order.productos.map((producto) => (
-                      <div key={producto.id} className="flex justify-between">
-                        <span>{producto.nombre}</span>
-                        <span className="font-semibold">${producto.precio.toFixed(2)}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-                
                 <div className="mt-4 border-t pt-4 flex justify-between items-center">
                   <span className="text-lg font-bold">Total:</span>
                   <span className="text-xl font-bold text-green-600">${order.total.toFixed(2)}</span>
