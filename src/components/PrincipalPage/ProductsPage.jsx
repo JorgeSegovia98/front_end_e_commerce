@@ -24,23 +24,25 @@ const ProductsPage = () => {
       try {
         const fetchedProducts = await getAllProducts();
 
-        const mappedProducts = fetchedProducts._embedded.productos.map((product) => ({
-          id: product.id,
-          title: product.nombre,
-          price: product.precio,
-          description: product.descripcion,
-          image: null,
-          rating: 4,
-        }));
-
-        for (const mappedProduct of mappedProducts) {
-          try {
-            const image = await getProductImage(mappedProduct.id);
-            mappedProduct.image = image || 'https://placehold.co/600x400';
-          } catch (imageError) {
-            console.error(`Error al cargar la imagen del producto ${mappedProduct.id}:`, imageError);
-          }
-        }
+        // Map products and load images concurrently
+        const mappedProducts = await Promise.all(
+          fetchedProducts.map(async (product) => {
+            let image = 'https://placehold.co/600x400';
+            try {
+              image = await getProductImage(product.id);
+            } catch (imageError) {
+              console.error(`Error al cargar la imagen del producto ${product.id}:`, imageError);
+            }
+            return {
+              id: product.id,
+              title: product.nombre,
+              price: product.precio,
+              description: product.descripcion,
+              image,
+              rating: 4,
+            };
+          })
+        );
 
         setProducts(mappedProducts);
       } catch (error) {
