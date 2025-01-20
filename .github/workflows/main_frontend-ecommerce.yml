@@ -24,6 +24,8 @@ jobs:
           node-version: '20.x'
 
       - name: Install dependencies and build project
+        env:
+          VITE_CHARIZARD_PIKACHU_777: ${{ secrets.VITE_CHARIZARD_PIKACHU_777 }}
         run: |
           npm install
           npm run build
@@ -32,7 +34,6 @@ jobs:
         run: |
           cd dist
           zip -r ../release.zip .
-
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
