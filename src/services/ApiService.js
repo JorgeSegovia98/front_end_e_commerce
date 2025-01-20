@@ -166,7 +166,7 @@ export async function editProduct(productId, formData) {
 
 export const createProduct = async (productData) => {
   try {
-    const response = await fetch(`${NICE}/data-api/productos`, {
+    const response = await fetch(`${NICE}/productos`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -201,7 +201,7 @@ export const createProduct = async (productData) => {
 // Ejemplo: Obtener todos los productos
 export const getAllProducts = async () => {
   try {
-    const response = await fetch(`${NICE}/data-api/productos`, {
+    const response = await fetch(`${NICE}/productos`, {
       method: 'GET',
       headers: getAuthHeaders(), // Incluimos el encabezado con el token
     });
@@ -292,7 +292,7 @@ export const createProductWithImage = async (productData, file) => {
   }
 
   try {
-    const response = await fetch(`${NICE}/data-api/productos`, {
+    const response = await fetch(`${NICE}/productos`, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${getCookie("jwt_token")}`, // Incluye el token JWT
@@ -318,7 +318,7 @@ export const createProductWithImage = async (productData, file) => {
 
 export const createOrder = async (pedido) => {
   try {
-    const response = await fetch(`${NICE}/data-api/pedidos`, {
+    const response = await fetch(`${NICE}/pedidos`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
