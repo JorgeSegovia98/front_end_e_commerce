@@ -1,11 +1,11 @@
 import { setCookie, getCookie } from "utils/Cookies";
 
-const API = 'https://backend-ecommerse-b6anfne4gqgacyc5.canadacentral-01.azurewebsites.net';
+const NICE = import.meta.env.VITE_CHARIZARD_PIKACHU_777;
 
 // Función para establecer el token JWT
 export async function login(username, password) {
   try {
-    const response = await fetch(`${API}/login`, {
+    const response = await fetch(`${NICE}/login`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -60,7 +60,7 @@ export function getAuthenticatedUser() {
 
 export async function changePassword(username, newPassword, securityAnswer) {
   try {
-    const response = await fetch(`${API}/cambiar-contrasena`, {
+    const response = await fetch(`${NICE}/cambiar-contrasena`, {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
@@ -88,7 +88,7 @@ export async function changePassword(username, newPassword, securityAnswer) {
 
 export async function register(username, password, correo, direccion, telefono, preguntaSeguridad) {
   try {
-    const response = await fetch(`${API}/registro`, {
+    const response = await fetch(`${NICE}/registro`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -117,7 +117,7 @@ export async function register(username, password, correo, direccion, telefono, 
 // Obtener productos de usuario
 export async function getUserProducts() {
   try {
-    const response = await fetch(`${API}/productos/usuario`, {
+    const response = await fetch(`${NICE}/productos/usuario`, {
       method: 'GET',
       headers: getAuthHeaders(),
     });
@@ -144,7 +144,7 @@ export async function getUserProducts() {
 // Editar un producto
 export async function editProduct(productId, formData) {
   try {
-    const response = await fetch(`${API}/productos/editar/${productId}`, {
+    const response = await fetch(`${NICE}/productos/editar/${productId}`, {
       method: 'PATCH',
       headers: getAuthHeaders(),
       body: JSON.stringify(formData),
@@ -166,7 +166,7 @@ export async function editProduct(productId, formData) {
 
 export const createProduct = async (productData) => {
   try {
-    const response = await fetch(`${API}/data-api/productos`, {
+    const response = await fetch(`${NICE}/data-api/productos`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -201,7 +201,7 @@ export const createProduct = async (productData) => {
 // Ejemplo: Obtener todos los productos
 export const getAllProducts = async () => {
   try {
-    const response = await fetch(`${API}/data-api/productos`, {
+    const response = await fetch(`${NICE}/data-api/productos`, {
       method: 'GET',
       headers: getAuthHeaders(), // Incluimos el encabezado con el token
     });
@@ -223,7 +223,7 @@ export async function getProductImage(productId) {
     // Log para verificar el producto solicitado
     console.log(`Solicitando imagen para el producto: ${productId}`);
     
-    const response = await fetch(`${API}/productos/imagen/${productId}`, {
+    const response = await fetch(`${NICE}/productos/imagen/${productId}`, {
       method: 'GET',
       headers: getAuthHeaders(), // Incluye el token JWT aquí
     });
@@ -255,7 +255,7 @@ export const uploadImage = async (productId, file) => {
   formData.append('file', file);
 
   try {
-    const response = await fetch(`${API}/productos/upload/${productId}`, {
+    const response = await fetch(`${NICE}/productos/upload/${productId}`, {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${getCookie('jwt_token')}`, // Incluye el token JWT
@@ -292,7 +292,7 @@ export const createProductWithImage = async (productData, file) => {
   }
 
   try {
-    const response = await fetch(`${API}/data-api/productos`, {
+    const response = await fetch(`${NICE}/data-api/productos`, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${getCookie("jwt_token")}`, // Incluye el token JWT
@@ -318,7 +318,7 @@ export const createProductWithImage = async (productData, file) => {
 
 export const createOrder = async (pedido) => {
   try {
-    const response = await fetch(`${API}/data-api/pedidos`, {
+    const response = await fetch(`${NICE}/data-api/pedidos`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
