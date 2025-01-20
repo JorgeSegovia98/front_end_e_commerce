@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom'; // Importa useNavigate
 import { getAuthHeaders } from 'services/ApiService';
 
 const API = 'https://backend-ecommerse-b6anfne4gqgacyc5.canadacentral-01.azurewebsites.net';
@@ -7,6 +8,7 @@ const MyOrdersPage = () => {
   const [orders, setOrders] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
+  const navigate = useNavigate(); // Inicializa useNavigate
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -67,6 +69,12 @@ const MyOrdersPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-100 py-8">
+      <button
+        onClick={() => navigate('/products-page')} // Usa navigate para redirigir
+        className="text-blue-600 hover:text-blue-800 font-bold mb-4 self-start px-4"
+      >
+        ← Volver a la tienda
+      </button>
       <div className="container mx-auto px-4">
         <h1 className="text-4xl font-bold text-center mb-8">Mis Pedidos</h1>
         
