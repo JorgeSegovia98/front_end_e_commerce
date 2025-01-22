@@ -333,22 +333,29 @@ export const createPayment = async (total) => {
 };
 
 export const createOrder = async (pedido) => {
-  const response = await fetch(`${NICE}/pedidos/crear`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${getCookie('jwt_token')}`, // Incluye el token JWT
-    },
-    body: JSON.stringify(pedido),
-  });
+  try {
+    const response = await fetch(`${NICE}/pedidos/crear`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${getCookie('jwt_token')}`, // Incluye el token JWT
+      },
+      body: JSON.stringify(pedido),
+    });
 
-  console.log('Respuesta completa del backend:', response);
+    const responseData = await response.json(); // Intenta parsear la respuesta JSON
 
-  if (!response.ok) {
-    throw new Error('Error al crear el pedido');
+    if (!response.ok) {
+      console.error("Error del backend al crear el pedido:", responseData);
+      throw new Error(`Error del backend: ${response.status} ${response.statusText}`);
+    }
+
+    return responseData; // Devuelve la respuesta si es válida
+  } catch (error) {
+    console.error("Error al procesar la creación del pedido:", error);
+    throw error;
   }
 
-  return await response.json();
 };
 
 export const getOrders = async () => {
