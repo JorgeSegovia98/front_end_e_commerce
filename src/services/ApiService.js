@@ -332,14 +332,12 @@ export const createPayment = async (total) => {
   return await response.text(); // Devuelve la URL de PayPal para aprobación
 };
 
-
-
 export const createOrder = async (pedido) => {
   const response = await fetch(`${NICE}/pedidos/crear`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      Authorization: `Bearer ${getCookie("jwt_token")}`,
+      Authorization: `Bearer ${getCookie('jwt_token')}`, // Incluye el token JWT
     },
     body: JSON.stringify(pedido),
   });

@@ -58,6 +58,12 @@ export const CartProvider = ({ children }) => {
     return cartItems.reduce((total, item) => total + item.quantity, 0);
   };
 
+  // *** Nuevo método para vaciar el carrito ***
+  const clearCart = () => {
+    setCartItems([]); // Vacía el estado del carrito
+    localStorage.removeItem('cartItems'); // Limpia el carrito del localStorage
+  };
+
   return (
     <CartContext.Provider value={{
       cartItems,
@@ -65,7 +71,8 @@ export const CartProvider = ({ children }) => {
       removeFromCart,
       updateQuantity,
       getCartTotal,
-      getCartCount
+      getCartCount,
+      clearCart // Exportamos el nuevo método
     }}>
       {children}
     </CartContext.Provider>
