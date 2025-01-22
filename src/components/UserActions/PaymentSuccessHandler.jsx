@@ -2,32 +2,12 @@ import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createOrder } from '../../services/ApiService';
 import { useCart } from '../CartLogic/CartContext';
-import { getCookie } from 'utils/Cookies';
+import { getUserIdFromToken } from 'utils/Auth';
+
 
 export const PaymentSuccessHandler = () => {
-  const decodeToken = (token) => {
-    try {
-      const payloadBase64 = token.split('.')[1]; // Obtiene la segunda parte del token
-      const payloadDecoded = atob(payloadBase64); // Decodifica la base64
-      return JSON.parse(payloadDecoded); // Convierte a objeto JSON
-    } catch (error) {
-      console.error("Error al decodificar el token:", error);
-      return null;
-    }
-  };
-
-  // Obtén el token de la cookie
-  const token = getCookie('jwt_token');
-  let userId = null;
-
-  if (token) {
-    const decoded = decodeToken(token); // Decodifica el token
-    userId = decoded?.sub || null; // Extrae el campo `sub` (ID del usuario)
-  }
-
-  console.log("ID del usuario:", userId);
-
-
+  const userId = getUserIdFromToken
+  
   const navigate = useNavigate();
   const { clearCart, cartItems } = useCart(); // Obtener carrito
 
