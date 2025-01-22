@@ -342,6 +342,8 @@ export const createOrder = async (pedido) => {
     body: JSON.stringify(pedido),
   });
 
+  console.log('Respuesta completa del backend:', response);
+
   if (!response.ok) {
     throw new Error('Error al crear el pedido');
   }

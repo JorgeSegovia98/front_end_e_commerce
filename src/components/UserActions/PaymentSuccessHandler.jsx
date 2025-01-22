@@ -55,6 +55,7 @@ export const PaymentSuccessHandler = () => {
         productosIds: cartItems.map((item) => item.id),
       };
 
+      console.log('Datos del pedido enviados al backend:', pedido);
       await createOrder(pedido);
 
       // Vaciar el carrito después de crear el pedido
@@ -62,7 +63,7 @@ export const PaymentSuccessHandler = () => {
 
       // Redirigir a la página de pedidos
       alert('¡Pedido creado exitosamente!');
-      navigate('/my-orders');
+      navigate('/MyOrdersPage');
     } catch (error) {
       console.error('Error al crear el pedido:', error);
       alert('Hubo un problema al crear el pedido. Por favor, intenta nuevamente.');
