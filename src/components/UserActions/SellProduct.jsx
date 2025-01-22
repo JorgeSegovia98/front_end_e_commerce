@@ -1,32 +1,32 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { createProductWithImage,createProduct,uploadImage } from 'services/ApiService';
+import { createProductWithImage, createProduct, uploadImage } from 'services/ApiService';
 import { getCookie } from 'utils/Cookies';
 import DOMPurify from 'dompurify';
 
 export const SellProduct = () => {
   // Función para decodificar el JWT manualmente
-const decodeToken = (token) => {
-  try {
-    const payloadBase64 = token.split('.')[1]; // Obtiene la segunda parte del token
-    const payloadDecoded = atob(payloadBase64); // Decodifica la base64
-    return JSON.parse(payloadDecoded); // Convierte a objeto JSON
-  } catch (error) {
-    console.error("Error al decodificar el token:", error);
-    return null;
+  const decodeToken = (token) => {
+    try {
+      const payloadBase64 = token.split('.')[1]; // Obtiene la segunda parte del token
+      const payloadDecoded = atob(payloadBase64); // Decodifica la base64
+      return JSON.parse(payloadDecoded); // Convierte a objeto JSON
+    } catch (error) {
+      console.error("Error al decodificar el token:", error);
+      return null;
+    }
+  };
+
+  // Obtén el token de la cookie
+  const token = getCookie('jwt_token');
+  let userId = null;
+
+  if (token) {
+    const decoded = decodeToken(token); // Decodifica el token
+    userId = decoded?.sub || null; // Extrae el campo `sub` (ID del usuario)
   }
-};
 
-// Obtén el token de la cookie
-const token = getCookie('jwt_token');
-let userId = null;
-
-if (token) {
-  const decoded = decodeToken(token); // Decodifica el token
-  userId = decoded?.sub || null; // Extrae el campo `sub` (ID del usuario)
-}
-
-console.log("ID del usuario:", userId);
+  console.log("ID del usuario:", userId);
 
   const [productName, setProductName] = useState('');
   const [price, setPrice] = useState('');
@@ -48,33 +48,33 @@ console.log("ID del usuario:", userId);
     e.preventDefault();
     const sanitizedProductName = DOMPurify.sanitize(productName);
     const sanitizedDescription = DOMPurify.sanitize(description);
-  
+
     const productData = {
       nombre: sanitizedProductName,
       precio: parseFloat(price),
       descripcion: sanitizedDescription,
       usuario: { id: userId }, // ID extraído del token
     };
-  
+
     try {
       // Paso 1: Crear el producto
       const createdProduct = await createProduct(productData);
       console.log('Producto creado:', createdProduct);
-  
+
       // Paso 2: Subir la imagen si existe
       if (image) {
         await uploadImage(createdProduct.id, image);
         console.log('Imagen subida exitosamente');
       }
-  
+
       navigate('/products-page');
     } catch (error) {
       console.error('Error al publicar el producto:', error);
       setError('Hubo un error al publicar el producto. Intenta de nuevo.');
     }
   };
-  
-  
+
+
 
   return (
     <div className="min-h-screen bg-gray-100">
