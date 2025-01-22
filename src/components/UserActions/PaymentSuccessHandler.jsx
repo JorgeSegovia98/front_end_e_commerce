@@ -6,8 +6,8 @@ import { getUserIdFromToken } from 'utils/Auth';
 
 
 export const PaymentSuccessHandler = () => {
-  const userId = getUserIdFromToken
-  
+  const userId = getUserIdFromToken(); // ID del usuario extraído del token
+
   const navigate = useNavigate();
   const { clearCart, cartItems } = useCart(); // Obtener carrito
 
