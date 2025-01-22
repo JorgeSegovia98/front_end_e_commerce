@@ -29,25 +29,24 @@ export const PaymentSuccessHandler = () => {
 
   const handleSuccessPayment = async () => {
     try {
-      // Crear el pedido en el backend
+      // Asegúrate de que los datos están en el formato correcto
       const pedido = {
-        id_usuario: userId, // Cambiar por el usuario autenticado
-        productosIds: cartItems.map((item) => item.id),
+        id_usuario: parseInt(userId, 10), // Convertir a número explícitamente
+        productosIds: cartItems.map((item) => parseInt(item.id, 10)), // Convertir los IDs a números
       };
 
-      console.log('Datos del pedido enviados al backend:', pedido);
-      await createOrder(pedido);
+      console.log("Datos enviados al backend para crear el pedido:", pedido);
 
-      // Vaciar el carrito después de crear el pedido
-      clearCart();
+      const response = await createOrder(pedido); // Llamada al backend para crear el pedido
+      console.log("Respuesta del backend al crear el pedido:", response);
 
-      // Redirigir a la página de pedidos
-      alert('¡Pedido creado exitosamente!');
-      navigate('/MyOrdersPage');
+      clearCart(); // Vaciar el carrito después de crear el pedido
+      alert("¡Pedido creado exitosamente!");
+      navigate("/my-orders"); // Redirigir a la página de pedidos
     } catch (error) {
-      console.error('Error al crear el pedido:', error);
-      alert('Hubo un problema al crear el pedido. Por favor, intenta nuevamente.');
-      navigate('/cart');
+      console.error("Error al crear el pedido:", error);
+      alert("Hubo un problema al crear el pedido. Por favor, intenta nuevamente.");
+      navigate("/cart");
     }
   };
 
