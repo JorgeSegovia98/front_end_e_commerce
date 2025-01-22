@@ -13,6 +13,7 @@ import { SellProduct } from '../components/UserActions/SellProduct';
 import MyProductsPage from '../components/UserActions/MyProductsPage';
 import MyOrdersPage from '../components/UserActions/MyOrdersPage';
 import GroupChatPage from '../components/UserActions/GroupChatPage';
+import { PaymentSuccessHandler } from '../components/UserActions/PaymentSuccessHandler';
 import { getAuthenticatedUser } from '../services/ApiService';
 
 function PrivateRoute({ children }) {
@@ -26,7 +27,7 @@ export default function AppRoutes() {
       <CartProvider>
         <CartIcon />
         <Routes>
-          <Route path="/" element={<Home />} />
+          <Route path="/" element={<HomeRedirectHandler  />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route
@@ -87,7 +88,23 @@ export default function AppRoutes() {
             }
           />
         </Routes>
+
+
       </CartProvider>
     </Router>
   );
 }
+
+// Componente para manejar la redirección condicional en "/"
+const HomeRedirectHandler = () => {
+  console.log('Renderizando HomeRedirectHandler...');
+
+  const query = new URLSearchParams(window.location.search);
+  const status = query.get('status');
+
+  if (status === 'exito') {
+    return <PaymentSuccessHandler />;
+  }
+
+  return <Home />;
+};

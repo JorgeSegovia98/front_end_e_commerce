@@ -8,33 +8,12 @@ export const Cart = () => {
   const navigate = useNavigate();
   const { cartItems, removeFromCart, updateQuantity, getCartTotal } = useCart();
 
-  const goToPayment = async () => {
-    // Crear el pedido
-    const pedido = {
-      productos: cartItems.map(item => ({
-        id: item.id,
-        nombre: item.title,
-        cantidad: item.quantity,
-        precio: item.price,
-      })),
-      totalDinero: getCartTotal(),
-      fechaPedido: new Date().toISOString(),
-    };
-
-    try {
-      // Llamar al ApiService para crear el pedido
-      await createOrder(pedido);
-
-      // Guardar el total en localStorage
-      localStorage.setItem('totalPedido', getCartTotal());
-
-      // Redirigir a la página de pago
-      navigate('/payment');
-    } catch (error) {
-      console.error('Error al crear el pedido:', error);
-      alert('Hubo un problema al crear tu pedido. Por favor, intenta nuevamente.');
-    }
+  const goToPayment = () => {
+    const total = getCartTotal();
+    localStorage.setItem('totalPedido', total);
+    navigate('/payment');
   };
+
 
   if (cartItems.length === 0) {
     return (

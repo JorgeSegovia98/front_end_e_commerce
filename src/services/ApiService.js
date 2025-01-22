@@ -222,7 +222,7 @@ export async function getProductImage(productId) {
   try {
     // Log para verificar el producto solicitado
     console.log(`Solicitando imagen para el producto: ${productId}`);
-    
+
     const response = await fetch(`${NICE}/productos/imagen/${productId}`, {
       method: 'GET',
       headers: getAuthHeaders(), // Incluye el token JWT aquí
@@ -314,26 +314,52 @@ export const createProductWithImage = async (productData, file) => {
 };
 
 
-
-
-export const createOrder = async (pedido) => {
-  try {
-    const response = await fetch(`${NICE}/pedidos`, {
+export const createPayment = async (total) => {
+  const response = await fetch(
+    `${NICE}/paypal/pagar?total=${total}`,
+    {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
+        Authorization: `Bearer ${getCookie("jwt_token")}`,
       },
-      body: JSON.stringify(pedido),
-    });
-
-    if (!response.ok) {
-      throw new Error('Error al crear el pedido');
     }
+  );
 
-    const createdOrder = await response.json();
-    return createdOrder;
-  } catch (error) {
-    console.error('Error en createOrder:', error);
-    throw error;
+  if (!response.ok) {
+    throw new Error('Error al crear el pago');
   }
+
+  return await response.text(); // Devuelve la URL de PayPal para aprobación
 };
+
+export const createOrder = async (pedido) => {
+  const response = await fetch(`${NICE}/pedidos/crear`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${getCookie('jwt_token')}`, // Incluye el token JWT
+    },
+    body: JSON.stringify(pedido),
+  });
+
+  if (!response.ok) {
+    throw new Error('Error al crear el pedido');
+  }
+
+  return await response.json();
+};
+
+export const getOrders = async () => {
+  const response = await fetch(`${process.env.VITE_CHARIZARD_PIKACHU_777}/pedidos`, {
+    headers: {
+      Authorization: `Bearer ${getCookie("jwt_token")}`,
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error('Error al obtener los pedidos');
+  }
+
+  return await response.json();
+};
+
