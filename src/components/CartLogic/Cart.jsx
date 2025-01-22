@@ -7,14 +7,17 @@ import { createOrder } from '../../services/ApiService.js'; // Ruta corregida
 export const Cart = () => {
   const navigate = useNavigate();
   const { cartItems, removeFromCart, updateQuantity, getCartTotal } = useCart();
-
+// Función para ir al proceso de pago
   const goToPayment = () => {
     const total = getCartTotal();
+    // Guardando el total del pedido en el almacenamiento local (localStorage)
+    // Nota de seguridad: Almacenar solo datos no sensibles (como el total) en localStorage.
+    // Evitar guardar información sensible del usuario, como detalles de tarjetas de crédito.
     localStorage.setItem('totalPedido', total);
     navigate('/payment');
   };
 
-
+// Si el carrito está vacío, mostramos un mensaje y un botón para seguir comprando
   if (cartItems.length === 0) {
     return (
       <div className="container mx-auto px-4 py-8">

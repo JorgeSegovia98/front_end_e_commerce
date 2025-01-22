@@ -1,16 +1,16 @@
-import React, { useState, useEffect } from 'react'; 
+import React, { useState, useEffect } from 'react';
 import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import { useCart } from '../CartLogic/CartContext';
 
 export const ProductDetail = () => {
-  const { id } = useParams();
+  const { id } = useParams(); // Obtener el ID del producto desde los parámetros de la URL
   const navigate = useNavigate();
-  const { state } = useLocation();
-  const [product, setProduct] = useState(state ? state.product : null);
-  const [search, setSearch] = useState('');
-  const { addToCart, getCartCount } = useCart();
+  const { state } = useLocation(); // Obtener datos pasados desde la navegación
+  const [product, setProduct] = useState(state ? state.product : null); // Producto actual
+  const [search, setSearch] = useState(''); // Estado para el campo de búsqueda
+  const { addToCart } = useCart(); // Función para añadir productos al carrito
 
-  // Fetch product details if not passed from previous page
+  // Obtener los detalles del producto si no se pasaron desde la página anterior
   useEffect(() => {
     if (!product) {
       const fetchProduct = async () => {
@@ -20,18 +20,20 @@ export const ProductDetail = () => {
             throw new Error('Error al obtener el producto');
           }
           const fetchedProduct = await response.json();
-          // Map the fetched product to match your expected format
+
+          // Formatear los datos del producto para cumplir con los requisitos del front-end
           const mappedProduct = {
             id: fetchedProduct.id,
             title: fetchedProduct.nombre,
             price: fetchedProduct.precio,
             description: fetchedProduct.descripcion,
-            image: fetchedProduct.imagen || 'https://placehold.co/600x400',
-            rating: 4 // You might want to add a rating field in your backend
+            image: fetchedProduct.imagen || 'https://placehold.co/600x400', // Imagen por defecto
+            rating: 4, // Campo fijo para la calificación, ajustable si el backend lo provee
           };
+
           setProduct(mappedProduct);
         } catch (error) {
-          console.error(error);
+          // En caso de error, redirigir a la página de productos
           navigate('/products-page');
         }
       };
@@ -40,19 +42,14 @@ export const ProductDetail = () => {
     }
   }, [id, product, navigate]);
 
+  // Manejar la acción de añadir al carrito
   const handleAddToCart = () => {
-    if (!product) {
-      console.error('Producto no encontrado');
-      return;
-    }
-
-    // Add product to cart
-    addToCart(product);
-
-    // Navigate to cart
-    navigate('/cart');
+    if (!product) return; // Si el producto no existe, no hacer nada
+    addToCart(product); // Añadir el producto al carrito
+    navigate('/cart'); // Redirigir al carrito
   };
 
+  // Mostrar un mensaje de carga mientras se obtienen los detalles del producto
   if (!product) {
     return (
       <div className="container mx-auto px-4 py-8">
@@ -63,11 +60,11 @@ export const ProductDetail = () => {
 
   return (
     <div className="min-h-screen bg-gray-100">
-      {/* Navbar */}
+      {/* Barra de navegación */}
       <nav className="bg-white shadow mb-8">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
           <div className="flex items-center gap-4">
-            <h1 
+            <h1
               className="text-2xl font-bold text-blue-600 cursor-pointer"
               onClick={() => navigate('/products-page')}
             >
@@ -82,7 +79,7 @@ export const ProductDetail = () => {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
-            <button 
+            <button
               className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700"
               onClick={() => navigate('/products-page')}
             >
@@ -92,7 +89,7 @@ export const ProductDetail = () => {
         </div>
       </nav>
 
-      {/* Product Detail */}
+      {/* Detalles del producto */}
       <div className="container mx-auto px-4 py-8">
         <div className="flex flex-col md:flex-row gap-8">
           <div className="w-full md:w-2/3">

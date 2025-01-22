@@ -16,16 +16,18 @@ export default function ForgotPassword() {
 
   const navigate = useNavigate();
 
+  // Función para manejar el restablecimiento de la contraseña
   const handlePasswordReset = async (e) => {
     e.preventDefault();
     setError("");
 
+    // Verificar que las contraseñas coincidan
     if (newPassword !== confirmPassword) {
       setError("Las contraseñas no coinciden.");
       return;
     }
 
-    // Validar la contraseña con el regex
+    // Validar la nueva contraseña utilizando una expresión regular para asegurar que cumpla con los criterios de seguridad
     if (!passwordRegex.test(newPassword)) {
       setError(
         "La contraseña debe tener al menos 8 caracteres, una letra mayúscula, una letra minúscula, un número y un carácter especial."
@@ -34,9 +36,11 @@ export default function ForgotPassword() {
     }
 
     try {
+      // Se utiliza DOMPurify para limpiar cualquier entrada y prevenir ataques de Cross-Site Scripting (XSS)
       const sanitizedNewPassword = DOMPurify.sanitize(newPassword);
       const sanitizedSecurityAnswer = DOMPurify.sanitize(securityAnswer);
 
+      // Enviar la solicitud para cambiar la contraseña utilizando los datos sanitizados
       const changePasswordResponse = await changePassword(
         username, // Nombre de usuario
         sanitizedNewPassword, // Contraseña nueva
@@ -44,14 +48,18 @@ export default function ForgotPassword() {
       );
 
       if (changePasswordResponse) {
+        // Si el cambio de contraseña es exitoso, se informa al usuario y se redirige a la página de inicio de sesión
         alert("Contraseña actualizada exitosamente.");
         navigate("/"); // Redirige al inicio de sesión
       } else {
+        // Si la respuesta del servidor es negativa (credenciales incorrectas), se muestra un error
         setError("Credenciales incorrectas. Intenta nuevamente.");
       }
     } catch (error) {
+      // En caso de error inesperado, se captura y se muestra un mensaje genérico
       setError("Error inesperado al cambiar la contraseña.");
-      console.error("Error en handlePasswordReset:", error);
+      // Eliminamos los console.log que pueden exponer detalles sensibles
+      // console.error("Error en handlePasswordReset:", error); // Comentado para producción
     }
   };
 
@@ -71,7 +79,7 @@ export default function ForgotPassword() {
             name="username"
             placeholder="Tu nombre de usuario"
             value={username}
-            onChange={(e) => setUsername(DOMPurify.sanitize(e.target.value))}
+            onChange={(e) => setUsername(DOMPurify.sanitize(e.target.value))} // Sanitización de la entrada
             required
           />
           <Input
@@ -80,7 +88,7 @@ export default function ForgotPassword() {
             name="securityAnswer"
             placeholder="Ingresa tu respuesta"
             value={securityAnswer}
-            onChange={(e) => setSecurityAnswer(DOMPurify.sanitize(e.target.value))}
+            onChange={(e) => setSecurityAnswer(DOMPurify.sanitize(e.target.value))} // Sanitización de la entrada
             required
           />
           <Input
@@ -89,7 +97,7 @@ export default function ForgotPassword() {
             name="newPassword"
             placeholder="••••••••"
             value={newPassword}
-            onChange={(e) => setNewPassword(DOMPurify.sanitize(e.target.value))}
+            onChange={(e) => setNewPassword(DOMPurify.sanitize(e.target.value))} // Sanitización de la entrada
             required
           />
           <Input
@@ -98,7 +106,7 @@ export default function ForgotPassword() {
             name="confirmPassword"
             placeholder="••••••••"
             value={confirmPassword}
-            onChange={(e) => setConfirmPassword(DOMPurify.sanitize(e.target.value))}
+            onChange={(e) => setConfirmPassword(DOMPurify.sanitize(e.target.value))} // Sanitización de la entrada
             required
           />
           <Button type="submit" text="Guardar Contraseña" />

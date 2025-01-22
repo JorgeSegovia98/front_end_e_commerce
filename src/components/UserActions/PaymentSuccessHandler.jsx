@@ -4,47 +4,45 @@ import { createOrder } from '../../services/ApiService';
 import { useCart } from '../CartLogic/CartContext';
 import { getUserIdFromToken } from 'utils/Auth';
 
-
 export const PaymentSuccessHandler = () => {
-  const userId = getUserIdFromToken(); // ID del usuario extraído del token
-
+  const userId = getUserIdFromToken(); // Extraer el ID del usuario desde el token
   const navigate = useNavigate();
-  const { clearCart, cartItems } = useCart(); // Obtener carrito
+  const { clearCart, cartItems } = useCart(); // Obtener funciones y datos del carrito
 
   useEffect(() => {
-    console.log('Ejecutando PaymentSuccessHandler...');
+    // Obtener los parámetros de la URL
     const query = new URLSearchParams(window.location.search);
     const status = query.get('status');
-    console.log('Parámetro status:', status);
 
     if (status === 'exito') {
-      console.log('Procesando el pago...');
+      // Si el pago fue exitoso, procesar la orden
       handleSuccessPayment();
     } else {
-      console.log('Estado no válido, redirigiendo al carrito...');
+      // Si el estado no es válido, redirigir al carrito
       navigate('/cart');
     }
   }, [navigate]);
 
-
+  // Función para manejar un pago exitoso
   const handleSuccessPayment = async () => {
     try {
-      // Asegúrate de que los datos están en el formato correcto
+      // Preparar los datos del pedido
       const pedido = {
-        id_usuario: parseInt(userId, 10), // Convertir a número explícitamente
-        productosIds: cartItems.map((item) => parseInt(item.id, 10)), // Convertir los IDs a números
+        id_usuario: parseInt(userId, 10), // Convertir el ID del usuario a número
+        productosIds: cartItems.map((item) => parseInt(item.id, 10)), // Convertir los IDs de los productos a números
       };
 
-      console.log("Datos enviados al backend para crear el pedido:", pedido);
+      // Llamar al backend para crear el pedido
+      await createOrder(pedido);
 
-      const response = await createOrder(pedido); // Llamada al backend para crear el pedido
-      console.log("Respuesta del backend al crear el pedido:", response);
-
-      clearCart(); // Vaciar el carrito después de crear el pedido
+      // Vaciar el carrito y notificar al usuario
+      clearCart();
       alert("¡Pedido creado exitosamente!");
-      navigate("/my-orders"); // Redirigir a la página de pedidos
+
+      // Redirigir a la página de pedidos
+      navigate("/my-orders");
     } catch (error) {
-      console.error("Error al crear el pedido:", error);
+      // Manejar errores durante la creación del pedido
       alert("Hubo un problema al crear el pedido. Por favor, intenta nuevamente.");
       navigate("/cart");
     }
@@ -52,6 +50,7 @@ export const PaymentSuccessHandler = () => {
 
   return (
     <div className="container mx-auto px-4 py-8">
+      {/* Mensaje mientras se procesa el pago */}
       <h1 className="text-2xl font-bold mb-6">Procesando pago...</h1>
       <p>Por favor, espera mientras verificamos los detalles de tu pago.</p>
     </div>
