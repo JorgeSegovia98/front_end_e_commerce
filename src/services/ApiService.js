@@ -343,14 +343,10 @@ export const createOrder = async (pedido) => {
     throw new Error('Error al crear el pedido');
   }
 
-  // Manejo dinámico del tipo de respuesta
-  const contentType = response.headers.get('content-type');
-  if (contentType && contentType.includes('application/json')) {
-    return await response.json(); // Procesar como JSON
-  } else {
-    return await response.text(); // Procesar como texto
-  }
+  // Aquí asumimos que el backend SIEMPRE devuelve texto
+  return await response.text(); // Procesar siempre como texto
 };
+
 
 
 

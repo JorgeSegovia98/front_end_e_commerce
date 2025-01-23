@@ -36,11 +36,7 @@ export const PaymentSuccessHandler = () => {
     clearCart();
 
     // Verifica si el resultado es texto o un objeto JSON
-    if (typeof result === 'string') {
-      console.log(result); // Mensaje del backend
-    } else {
-      console.log('Pedido creado:', result); // JSON del backend
-    }
+    alert(result);
 
     // Redirigir a la página de pedidos
     navigate('/MyOrdersPage');
