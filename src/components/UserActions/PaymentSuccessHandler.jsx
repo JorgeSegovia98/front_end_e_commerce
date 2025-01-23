@@ -23,7 +23,6 @@ export const PaymentSuccessHandler = () => {
     }
   }, [navigate]);
 
-  // Función para manejar un pago exitoso
   const handleSuccessPayment = async () => {
     try {
       // Crear el pedido en el backend
@@ -32,28 +31,24 @@ export const PaymentSuccessHandler = () => {
         productosIds: cartItems.map((item) => item.id),
       };
 
-      console.log('Datos del pedido enviados al backend:', pedido);
-
       const response = await createOrder(pedido);
 
       // Verificar si la respuesta del backend fue exitosa
       if (response && response.id) {
-        console.log('Pedido creado exitosamente:', response);
         // Vaciar el carrito después de crear el pedido
         clearCart();
 
         // Redirigir a la página de pedidos
-        alert('¡Pedido creado exitosamente!');
         navigate('/my-orders');
       } else {
         throw new Error('Respuesta inesperada del backend al crear el pedido');
       }
-    } catch (error) {
-      console.error('Error al crear el pedido:', error);
+    } catch {
       alert('Hubo un problema al crear el pedido. Por favor, intenta nuevamente.');
       navigate('/cart');
     }
   };
+
 
 
   return (

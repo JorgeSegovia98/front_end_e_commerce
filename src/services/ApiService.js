@@ -333,30 +333,22 @@ export const createPayment = async (total) => {
 };
 
 export const createOrder = async (pedido) => {
-  try {
-    const response = await fetch(`${NICE}/pedidos/crear`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${getCookie('jwt_token')}`, // Incluye el token JWT
-      },
-      body: JSON.stringify(pedido),
-    });
+  const response = await fetch(`${NICE}/pedidos/crear`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${getCookie('jwt_token')}`, // Incluye el token JWT
+    },
+    body: JSON.stringify(pedido),
+  });
 
-    const responseData = await response.json(); // Intenta parsear la respuesta JSON
-
-    if (!response.ok) {
-      console.error("Error del backend al crear el pedido:", responseData);
-      throw new Error(`Error del backend: ${response.status} ${response.statusText}`);
-    }
-
-    return responseData; // Devuelve la respuesta si es válida
-  } catch (error) {
-    console.error("Error al procesar la creación del pedido:", error);
-    throw error;
+  if (!response.ok) {
+    throw new Error('Error al crear el pedido');
   }
 
+  return await response.json(); // Devuelve la respuesta del backend como JSON
 };
+
 
 export const getOrders = async () => {
   const response = await fetch(`${process.env.VITE_CHARIZARD_PIKACHU_777}/pedidos`, {
