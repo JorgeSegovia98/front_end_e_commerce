@@ -44,16 +44,13 @@ export const PaymentSuccessHandler = () => {
       }
 
       // Redirigir a la página de pedidos
-      navigate('/my-orders');
+      navigate('/MyOrdersPage');
     } catch (error) {
       console.error('Error al crear el pedido:', error);
       alert('Hubo un problema al crear el pedido. Por favor, intenta nuevamente.');
       navigate('/cart');
     }
   };
-
-
-
 
   return (
     <div className="container mx-auto px-4 py-8">
