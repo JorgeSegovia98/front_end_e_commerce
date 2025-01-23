@@ -343,8 +343,15 @@ export const createOrder = async (pedido) => {
     throw new Error('Error al crear el pedido');
   }
 
-  return await response.json(); // Devuelve la respuesta del backend como JSON
+  // Manejo dinámico del tipo de respuesta
+  const contentType = response.headers.get('content-type');
+  if (contentType && contentType.includes('application/json')) {
+    return await response.json(); // Procesar como JSON
+  } else {
+    return await response.text(); // Procesar como texto
+  }
 };
+
 
 
 export const getOrders = async () => {
