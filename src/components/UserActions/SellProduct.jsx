@@ -17,6 +17,22 @@ export const SellProduct = () => {
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
+      const validFormats = ['image/png', 'image/jpeg'];
+      const maxSize = 3 * 1024 * 1024; // 3 MB en bytes
+
+      if (!validFormats.includes(file.type)) {
+        setError('Solo se permiten imágenes en formato PNG o JPG.');
+        setImage(null);
+        return;
+      }
+
+      if (file.size > maxSize) {
+        setError('La imagen no debe superar los 3 MB.');
+        setImage(null);
+        return;
+      }
+
+      setError(''); // Limpiar errores previos
       setImage(file); // Guardar la imagen seleccionada
     }
   };
@@ -24,6 +40,11 @@ export const SellProduct = () => {
   // Manejo del envío del formulario
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!image) {
+      setError('Debe seleccionar una imagen válida antes de publicar el producto.');
+      return;
+    }
 
     // Sanitizar entradas para prevenir ataques XSS
     const sanitizedProductName = DOMPurify.sanitize(productName);
@@ -41,10 +62,8 @@ export const SellProduct = () => {
       // Crear el producto en el backend
       const createdProduct = await createProduct(productData);
 
-      // Subir la imagen asociada si existe
-      if (image) {
-        await uploadImage(createdProduct.id, image);
-      }
+      // Subir la imagen asociada
+      await uploadImage(createdProduct.id, image);
 
       // Redirigir a la página de productos tras el éxito
       navigate('/products-page');
