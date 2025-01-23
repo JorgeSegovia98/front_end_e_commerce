@@ -2,21 +2,26 @@ import React, { useState, useEffect, useRef } from "react";
 import { Client } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 import { getCookie } from "utils/Cookies";
-import { useNavigate } from 'react-router-dom'; // ✅ Importar useNavigate
+import { useNavigate } from 'react-router-dom'; // Manejo de navegación
 
 const GroupChatPage = () => {
+  // Estados para mensajes y entrada del usuario
   const [messages, setMessages] = useState([]);
   const [messageInput, setMessageInput] = useState("");
-  const clientRef = useRef(null);
-  const nombreUsuario = getCookie("username");
-  const navigate = useNavigate(); // ✅ Usar navigate
+
+  const clientRef = useRef(null); // Referencia del cliente STOMP
+  const nombreUsuario = getCookie("username"); // Obtener el nombre del usuario desde la cookie
+  const navigate = useNavigate(); // Hook para navegar entre rutas
 
   useEffect(() => {
+    // Configuración del cliente STOMP y conexión al servidor WebSocket
     const socket = new SockJS('https://backend-ecommerse-b6anfne4gqgacyc5.canadacentral-01.azurewebsites.net/chat-websocket');
     const client = new Client({
       webSocketFactory: () => socket,
       onConnect: (frame) => {
-        console.log('Conectado: ' + frame);
+        console.log('Conectado:', frame);
+
+        // Suscripción al tópico para recibir mensajes
         client.subscribe('/topic/mensajes', (message) => {
           const parsedMessage = JSON.parse(message.body);
           setMessages((prevMessages) => [...prevMessages, parsedMessage]);
@@ -27,9 +32,11 @@ const GroupChatPage = () => {
       },
     });
 
+    // Activar el cliente y almacenar la referencia
     clientRef.current = client;
     client.activate();
 
+    // Limpiar la conexión al desmontar el componente
     return () => {
       if (clientRef.current) {
         clientRef.current.deactivate();
@@ -37,6 +44,7 @@ const GroupChatPage = () => {
     };
   }, []);
 
+  // Función para enviar mensajes
   const sendMessage = () => {
     if (messageInput.trim()) {
       const message = { contenido: messageInput, emisor: nombreUsuario };
@@ -44,13 +52,13 @@ const GroupChatPage = () => {
         destination: '/app/enviarMensaje',
         body: JSON.stringify(message),
       });
-      setMessageInput("");
+      setMessageInput(""); // Limpiar el campo de entrada
     }
   };
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-b from-blue-50 to-indigo-100 py-6">
-      {/* Botón de regreso a products-page */}
+      {/* Botón de regreso a la página de productos */}
       <button
         onClick={() => navigate('/products-page')}
         className="text-blue-600 hover:text-blue-800 font-bold mb-4 self-start px-4"
@@ -58,7 +66,10 @@ const GroupChatPage = () => {
         ← Volver a la tienda
       </button>
 
+      {/* Encabezado del chat */}
       <h1 className="text-4xl font-bold text-center text-gray-800">Chat Grupal</h1>
+
+      {/* Contenedor del chat */}
       <div className="chat-container mt-8 mx-auto w-full max-w-2xl bg-white rounded-lg shadow-lg p-6 overflow-auto h-96">
         <ul id="messages" className="space-y-4">
           {messages.map((message, index) => (
@@ -80,6 +91,8 @@ const GroupChatPage = () => {
           ))}
         </ul>
       </div>
+
+      {/* Contenedor de entrada de texto */}
       <div className="input-container mt-4 mx-auto max-w-2xl flex items-center justify-between px-4">
         <input
           type="text"

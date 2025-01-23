@@ -5,7 +5,8 @@ import { Input } from "./Input";
 import { Button } from "./Button";
 import { login } from "../../services/ApiService";
 import { setCookie } from "../../utils/Cookies";
-import DOMPurify from "dompurify";
+import DOMPurify from "dompurify"; // La inclusión de DOMPurify es una medida importante
+// para prevenir ataques XSS al sanear datos de entrada del usuario.
 
 export default function Home() {
   const [username, setUsername] = useState('');
@@ -16,7 +17,8 @@ export default function Home() {
   const handleLogin = async (e) => {
     e.preventDefault();
 
-    const sanitizedUsername = DOMPurify.sanitize(username);
+    const sanitizedUsername = DOMPurify.sanitize(username); // El saneamiento del nombre de usuario es crucial
+    // para evitar inyecciones de scripts maliciosos el DOMPurify debe ser configurado.
 
     if (sanitizedUsername.includes('@')) {
       setError("El nombre de usuario no debe contener el carácter '@'.");
@@ -24,15 +26,20 @@ export default function Home() {
     }
 
     try {
-      const sanitizedPassword = DOMPurify.sanitize(password);
+      const sanitizedPassword = DOMPurify.sanitize(password); // Aunque el saneamiento de la contraseña
+      //  no es estrictamente necesario se agrega esta medida aumenta la seguridad general del sistema.
       const token = await login(sanitizedUsername, sanitizedPassword);
       if (token) {
-        setCookie('username', sanitizedUsername);
+        setCookie('username', sanitizedUsername); // El almacenamiento de cookies debe manejarse con cuidado
+        //  ,la cookie debe estar configurada con las banderas 'HttpOnly', 'Secure' y 'SameSite'
+        // para mitigar riesgos como el robo de sesiones.
         setError('');
         navigate('/products-page');
       }
     } catch (error) {
       setError('Ha ocurrido un error al momento de iniciar sesión');
+      // Se puede considerar registrar los errores de manera segura en el servidor
+      // para facilitar el diagnóstico sin exponer información sensible al usuario.
     }
   };
 

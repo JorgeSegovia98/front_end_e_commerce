@@ -7,7 +7,9 @@ import { useCart } from '../CartLogic/CartContext';
 import { deleteAllCookies } from 'utils/Cookies';
 import DOMPurify from 'dompurify';
 
+// Página principal de productos
 const ProductsPage = () => {
+  // Estados para manejar los datos de los productos, paginación, búsqueda, ordenamiento, carga y errores
   const [products, setProducts] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [search, setSearch] = useState('');
@@ -15,23 +17,25 @@ const ProductsPage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
   const navigate = useNavigate();
-  const { getCartCount } = useCart();
-  const productsPerPage = 8;
+  const { getCartCount } = useCart(); // Hook para obtener datos del carrito
+  const productsPerPage = 8; // Número de productos por página
 
+  // Efecto para obtener los productos al cargar la página
   useEffect(() => {
     const fetchProducts = async () => {
-      setIsLoading(true);
+      setIsLoading(true); // Activa el indicador de carga
       try {
+        // Obtener productos de la API
         const fetchedProducts = await getAllProducts();
 
-        // Map products and load images concurrently
+        // Mapeamos los productos y cargamos sus imágenes de forma concurrente
         const mappedProducts = await Promise.all(
           fetchedProducts.map(async (product) => {
-            let image = 'https://placehold.co/600x400';
+            let image = 'https://placehold.co/600x400'; // Placeholder en caso de error con la imagen
             try {
-              image = await getProductImage(product.id);
+              image = await getProductImage(product.id); // Intentar obtener la imagen del producto
             } catch (imageError) {
-              console.error(`Error al cargar la imagen del producto ${product.id}:`, imageError);
+              // En caso de error, se usa la imagen por defecto
             }
             return {
               id: product.id,
@@ -39,23 +43,23 @@ const ProductsPage = () => {
               price: product.precio,
               description: product.descripcion,
               image,
-              rating: 4,
+              rating: 4, // Calificación fija por ahora
             };
           })
         );
 
-        setProducts(mappedProducts);
+        setProducts(mappedProducts); // Establece los productos en el estado
       } catch (error) {
-        setError('Error al cargar los productos');
-        console.error(error);
+        setError('Error al cargar los productos'); // Mensaje de error en caso de fallo
       } finally {
-        setIsLoading(false);
+        setIsLoading(false); // Finaliza el indicador de carga
       }
     };
 
     fetchProducts();
   }, []);
 
+  // Función para ordenar los productos según la opción seleccionada
   const sortProducts = (productsToSort) => {
     switch (sortOption) {
       case 'price-asc':
@@ -67,12 +71,14 @@ const ProductsPage = () => {
     }
   };
 
+  // Filtrar y ordenar los productos según búsqueda y opción seleccionada
   const filteredAndSortedProducts = sortProducts(
     products.filter((product) =>
       product.title.toLowerCase().includes(search.toLowerCase())
     )
   );
 
+  // Calcular índices de paginación
   const indexOfLastProduct = currentPage * productsPerPage;
   const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
   const currentProducts = filteredAndSortedProducts.slice(
@@ -80,20 +86,25 @@ const ProductsPage = () => {
     indexOfLastProduct
   );
 
+  // Función para manejar el cambio de página
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
+  // Navegar a la página de mis productos
   const handleMyProducts = () => {
     navigate('/my-products');
   };
 
+  // Navegar a la página de mis pedidos
   const handleMyOrders = () => {
     navigate('/my-orders');
   };
 
+  // Navegar al chat grupal
   const handleGroupChat = () => {
     navigate('/group-chat');
   };
 
+  // Cerrar sesión y eliminar cookies
   const handleLogout = () => {
     deleteAllCookies();
     navigate('/');
@@ -183,9 +194,6 @@ const ProductsPage = () => {
               <ProductCard
                 key={product.id}
                 product={product}
-                onDetailsClick={() =>
-                  navigate(`/product-detail/${product.id}`, { state: { product } })
-                }
               />
             ))}
           </div>

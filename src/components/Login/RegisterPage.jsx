@@ -8,7 +8,7 @@ import DOMPurify from "dompurify";
 
 // Función para sanitizar las entradas usando DOMPurify
 const sanitizeInput = (input) => {
-  return DOMPurify.sanitize(input);
+  return DOMPurify.sanitize(input); // DOMPurify asegura que las entradas de los usuarios no contengan scripts maliciosos (XSS).
 };
 
 export default function RegisterPage() {
@@ -36,7 +36,7 @@ export default function RegisterPage() {
     const { name, value } = e.target;
     setFormData((prevState) => ({
       ...prevState,
-      [name]: sanitizeInput(value)
+      [name]: sanitizeInput(value) // Saneamos cada entrada del formulario para evitar inyecciones de datos.
     }));
   };
 
@@ -48,19 +48,19 @@ export default function RegisterPage() {
   // Validación adicional para el email
   const isEmailValid = (email) => {
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-    return emailRegex.test(email);
+    return emailRegex.test(email); // Aseguramos que el email siga un formato estándar.
   };
 
   // Validación adicional para el teléfono
   const isPhoneValid = (phone) => {
     const phoneRegex = /^[0-9]{10,15}$/;
-    return phoneRegex.test(phone);
+    return phoneRegex.test(phone); // Verificamos que el número de teléfono contenga solo dígitos y tenga la longitud adecuada.
   };
 
   // Función para validar la seguridad de la contraseña
   const isPasswordSecure = (password) => {
     const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-    return passwordRegex.test(password);
+    return passwordRegex.test(password); // La contraseña debe cumplir con los estándares de complejidad para mayor seguridad.
   };
 
   const handleSubmit = async (e) => {

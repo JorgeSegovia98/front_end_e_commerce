@@ -4,29 +4,26 @@ import { createOrder } from '../../services/ApiService';
 import { useCart } from '../CartLogic/CartContext';
 import { getUserIdFromToken } from 'utils/Auth';
 
-
 export const PaymentSuccessHandler = () => {
-  const userId = getUserIdFromToken(); // ID del usuario extraído del token
-
+  const userId = getUserIdFromToken(); // Extraer el ID del usuario desde el token
   const navigate = useNavigate();
-  const { clearCart, cartItems } = useCart(); // Obtener carrito
+  const { clearCart, cartItems } = useCart(); // Obtener funciones y datos del carrito
 
   useEffect(() => {
-    console.log('Ejecutando PaymentSuccessHandler...');
+    // Obtener los parámetros de la URL
     const query = new URLSearchParams(window.location.search);
     const status = query.get('status');
-    console.log('Parámetro status:', status);
 
     if (status === 'exito') {
-      console.log('Procesando el pago...');
+      // Si el pago fue exitoso, procesar la orden
       handleSuccessPayment();
     } else {
-      console.log('Estado no válido, redirigiendo al carrito...');
+      // Si el estado no es válido, redirigir al carrito
       navigate('/cart');
     }
   }, [navigate]);
 
-
+  // Función para manejar un pago exitoso
   const handleSuccessPayment = async () => {
     try {
       // Crear el pedido en el backend
@@ -61,6 +58,7 @@ export const PaymentSuccessHandler = () => {
 
   return (
     <div className="container mx-auto px-4 py-8">
+      {/* Mensaje mientras se procesa el pago */}
       <h1 className="text-2xl font-bold mb-6">Procesando pago...</h1>
       <p>Por favor, espera mientras verificamos los detalles de tu pago.</p>
     </div>

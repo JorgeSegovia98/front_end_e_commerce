@@ -5,6 +5,7 @@ import { Pagination } from 'components/PrincipalPage/Pagination';
 import { getUserProducts, editProduct } from 'services/ApiService';
 
 const MyProductsPage = () => {
+  // Estados para manejar los productos, edición, búsqueda, etc.
   const [products, setProducts] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [search, setSearch] = useState('');
@@ -14,20 +15,21 @@ const MyProductsPage = () => {
   const navigate = useNavigate();
   const productsPerPage = 8;
 
+  // Efecto para cargar los productos del usuario
   useEffect(() => {
     const fetchUserProducts = async () => {
       try {
         const userProducts = await getUserProducts();
         setProducts(userProducts);
       } catch (error) {
-        console.error("Error al cargar los productos:", error);
+        console.error('Error al cargar los productos:', error);
       }
     };
 
     fetchUserProducts();
   }, []);
 
-  // Lógica de edición
+  // Lógica para iniciar la edición de un producto
   const handleEditProduct = (product) => {
     setEditingProduct(product);
     setFormData({
@@ -38,6 +40,7 @@ const MyProductsPage = () => {
     setIsEditing(true);
   };
 
+  // Guardar los cambios realizados al producto
   const handleSaveEdit = async () => {
     try {
       const updatedProduct = await editProduct(editingProduct.id, formData);
@@ -50,21 +53,25 @@ const MyProductsPage = () => {
       );
       setIsEditing(false);
     } catch (error) {
-      console.error("Error al guardar cambios:", error);
+      console.error('Error al guardar cambios:', error);
     }
   };
 
-  // Filtrado y paginación
+  // Filtrado de productos según la búsqueda
   const filteredProducts = products.filter((product) =>
     product.title.toLowerCase().includes(search.toLowerCase())
   );
+
+  // Paginación de productos
   const indexOfLastProduct = currentPage * productsPerPage;
   const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
   const currentProducts = filteredProducts.slice(indexOfFirstProduct, indexOfLastProduct);
+
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
   return (
     <div className="min-h-screen bg-gray-100">
+      {/* Navegación */}
       <nav className="bg-white shadow mb-8">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
           <h1
@@ -75,8 +82,12 @@ const MyProductsPage = () => {
           </h1>
         </div>
       </nav>
+
+      {/* Contenido principal */}
       <div className="container mx-auto px-4 py-16">
         <h2 className="text-2xl font-bold text-center mb-6">Mis Productos</h2>
+
+        {/* Mostrar productos */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {currentProducts.map((product) => (
             <div key={product.id} className="relative">
@@ -90,6 +101,8 @@ const MyProductsPage = () => {
             </div>
           ))}
         </div>
+
+        {/* Paginación */}
         <Pagination
           currentPage={currentPage}
           productsPerPage={productsPerPage}
@@ -98,6 +111,7 @@ const MyProductsPage = () => {
         />
       </div>
 
+      {/* Modal de edición */}
       {isEditing && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
           <div className="bg-white p-8 rounded shadow-lg">
