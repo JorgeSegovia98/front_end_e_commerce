@@ -23,30 +23,33 @@ export const PaymentSuccessHandler = () => {
     }
   }, [navigate]);
 
-  // Función para manejar un pago exitoso
   const handleSuccessPayment = async () => {
     try {
-      // Preparar los datos del pedido
+      // Crear el pedido en el backend
       const pedido = {
-        id_usuario: parseInt(userId, 10), // Convertir el ID del usuario a número
-        productosIds: cartItems.map((item) => parseInt(item.id, 10)), // Convertir los IDs de los productos a números
+        id_usuario: userId, // Cambiar por el usuario autenticado
+        productosIds: cartItems.map((item) => item.id),
       };
 
-      // Llamar al backend para crear el pedido
-      await createOrder(pedido);
+      const response = await createOrder(pedido);
 
-      // Vaciar el carrito y notificar al usuario
-      clearCart();
-      alert("¡Pedido creado exitosamente!");
+      // Verificar si la respuesta del backend fue exitosa
+      if (response && response.id) {
+        // Vaciar el carrito después de crear el pedido
+        clearCart();
 
-      // Redirigir a la página de pedidos
-      navigate("/my-orders");
-    } catch (error) {
-      // Manejar errores durante la creación del pedido
-      alert("Hubo un problema al crear el pedido. Por favor, intenta nuevamente.");
-      navigate("/cart");
+        // Redirigir a la página de pedidos
+        navigate('/my-orders');
+      } else {
+        throw new Error('Respuesta inesperada del backend al crear el pedido');
+      }
+    } catch {
+      alert('Hubo un problema al crear el pedido. Por favor, intenta nuevamente.');
+      navigate('/cart');
     }
   };
+
+
 
   return (
     <div className="container mx-auto px-4 py-8">
