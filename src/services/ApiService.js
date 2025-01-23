@@ -220,9 +220,6 @@ export const getAllProducts = async () => {
 // Obtener la URL de la imagen de un producto por su ID
 export async function getProductImage(productId) {
   try {
-    // Log para verificar el producto solicitado
-    console.log(`Solicitando imagen para el producto: ${productId}`);
-
     const response = await fetch(`${NICE}/productos/imagen/${productId}`, {
       method: 'GET',
       headers: getAuthHeaders(), // Incluye el token JWT aquí
