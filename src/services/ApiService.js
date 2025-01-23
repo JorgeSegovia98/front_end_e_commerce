@@ -2,14 +2,33 @@ import { setCookie, getCookie } from "utils/Cookies";
 
 const NICE = import.meta.env.VITE_CHARIZARD_PIKACHU_777;
 
+// Función para establecer los encabezados comunes
+function getDefaultHeaders(authRequired = false) {
+  const headers = {
+    'Content-Type': 'application/json',
+    'Cache-Control': 'no-store',
+    'Pragma': 'no-cache',
+    'X-Content-Type-Options': 'nosniff',
+  };
+
+  if (authRequired) {
+    const token = getCookie('jwt_token');
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    } else {
+      console.error("No se encontró el token JWT en las cookies.");
+    }
+  }
+
+  return headers;
+}
+
 // Función para establecer el token JWT
 export async function login(username, password) {
   try {
     const response = await fetch(`${NICE}/login`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: getDefaultHeaders(),
       body: JSON.stringify({
         username: username,
         password: password,
@@ -19,7 +38,6 @@ export async function login(username, password) {
     if (response.status === 200) {
       const token = await response.text(); // El token se devuelve como texto
       setCookie("jwt_token", token); // Guardamos el token en cookies
-      console.log("Token recibido y guardado:", token);
       return true;
     } else {
       return false;
@@ -32,16 +50,7 @@ export async function login(username, password) {
 
 // Función para obtener el encabezado de autorización
 export function getAuthHeaders() {
-  const token = getCookie('jwt_token'); // Obtén el token de las cookies
-  if (!token) {
-    console.error("No se encontró el token JWT en las cookies.");
-    return {};
-  }
-
-  return {
-    'Authorization': `Bearer ${token}`, // Encabezado con el token
-    'Content-Type': 'application/json',
-  };
+  return getDefaultHeaders(true);
 }
 
 // Función para obtener el usuario autenticado desde el token
@@ -62,9 +71,7 @@ export async function changePassword(username, newPassword, securityAnswer) {
   try {
     const response = await fetch(`${NICE}/cambiar-contrasena`, {
       method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: getDefaultHeaders(),
       body: JSON.stringify({
         username: username, // Nombre de usuario
         nuevaContrasena: newPassword, // Nueva contraseña
@@ -85,14 +92,11 @@ export async function changePassword(username, newPassword, securityAnswer) {
   }
 }
 
-
 export async function register(username, password, correo, direccion, telefono, preguntaSeguridad) {
   try {
     const response = await fetch(`${NICE}/registro`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: getDefaultHeaders(),
       body: JSON.stringify({
         username: username,
         password: password,
@@ -163,15 +167,11 @@ export async function editProduct(productId, formData) {
   }
 }
 
-
 export const createProduct = async (productData) => {
   try {
     const response = await fetch(`${NICE}/productos`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${getCookie('jwt_token')}`, // Incluye el token JWT
-      },
+      headers: getAuthHeaders(),
       body: JSON.stringify({
         nombre: productData.nombre,
         precio: productData.precio,
@@ -196,14 +196,12 @@ export const createProduct = async (productData) => {
   }
 };
 
-
-
 // Ejemplo: Obtener todos los productos
 export const getAllProducts = async () => {
   try {
     const response = await fetch(`${NICE}/productos`, {
       method: 'GET',
-      headers: getAuthHeaders(), // Incluimos el encabezado con el token
+      headers: getAuthHeaders(),
     });
 
     if (!response.ok) {
@@ -222,18 +220,17 @@ export async function getProductImage(productId) {
   try {
     const response = await fetch(`${NICE}/productos/imagen/${productId}`, {
       method: 'GET',
-      headers: getAuthHeaders(), // Incluye el token JWT aquí
+      headers: getAuthHeaders(),
     });
 
     if (response.ok) {
-      // Convierte la respuesta binaria a un objeto URL para usar como fuente de imagen
       const blob = await response.blob();
       return URL.createObjectURL(blob);
     } else {
       console.error(
         `Error al obtener la imagen para el producto ${productId}: ${response.status} ${response.statusText}`
       );
-      return null; // Devuelve `null` si la imagen no se puede cargar
+      return null;
     }
   } catch (error) {
     console.error(
@@ -244,9 +241,6 @@ export async function getProductImage(productId) {
   }
 }
 
-
-
-// Subir la imagen de un producto
 export const uploadImage = async (productId, file) => {
   const formData = new FormData();
   formData.append('file', file);
@@ -255,7 +249,10 @@ export const uploadImage = async (productId, file) => {
     const response = await fetch(`${NICE}/productos/upload/${productId}`, {
       method: 'POST',
       headers: {
-        Authorization: `Bearer ${getCookie('jwt_token')}`, // Incluye el token JWT
+        Authorization: `Bearer ${getCookie('jwt_token')}`,
+        'Cache-Control': 'no-store',
+        'Pragma': 'no-cache',
+        'X-Content-Type-Options': 'nosniff',
       },
       body: formData,
     });
@@ -266,59 +263,19 @@ export const uploadImage = async (productId, file) => {
       throw new Error('Error al subir la imagen');
     }
 
-    console.log('Imagen subida exitosamente');
-    return await response.text(); // Devuelve un mensaje del servidor
+    return await response.text();
   } catch (error) {
     console.error('Error en uploadImage:', error);
     throw error;
   }
 };
 
-
-
-// Crear producto con imagen
-export const createProductWithImage = async (productData, file) => {
-  const formData = new FormData();
-
-  formData.append("nombre", productData.nombre);
-  formData.append("precio", productData.precio);
-  formData.append("descripcion", productData.descripcion);
-  formData.append("usuario", JSON.stringify({ id: productData.usuario.id })); // Corrige el usuario
-  if (file) {
-    formData.append("imagen", file); // Adjunta la imagen si existe
-  }
-
-  try {
-    const response = await fetch(`${NICE}/productos`, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${getCookie("jwt_token")}`, // Incluye el token JWT
-      },
-      body: formData,
-    });
-
-    if (!response.ok) {
-      const errorDetails = await response.text();
-      console.error("Error del servidor:", errorDetails);
-      throw new Error("Error al crear el producto");
-    }
-
-    return await response.json(); // Devuelve el producto creado
-  } catch (error) {
-    console.error("Error en createProductWithImage:", error);
-    throw error;
-  }
-};
-
-
 export const createPayment = async (total) => {
   const response = await fetch(
     `${NICE}/paypal/pagar?total=${total}`,
     {
       method: 'POST',
-      headers: {
-        Authorization: `Bearer ${getCookie("jwt_token")}`,
-      },
+      headers: getAuthHeaders(),
     }
   );
 
@@ -326,16 +283,13 @@ export const createPayment = async (total) => {
     throw new Error('Error al crear el pago');
   }
 
-  return await response.text(); // Devuelve la URL de PayPal para aprobación
+  return await response.text();
 };
 
 export const createOrder = async (pedido) => {
   const response = await fetch(`${NICE}/pedidos/crear`, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${getCookie('jwt_token')}`, // Incluye el token JWT
-    },
+    headers: getAuthHeaders(),
     body: JSON.stringify(pedido),
   });
 
@@ -343,18 +297,12 @@ export const createOrder = async (pedido) => {
     throw new Error('Error al crear el pedido');
   }
 
-  // Aquí asumimos que el backend SIEMPRE devuelve texto
-  return await response.text(); // Procesar siempre como texto
+  return await response.text();
 };
 
-
-
-
 export const getOrders = async () => {
-  const response = await fetch(`${process.env.VITE_CHARIZARD_PIKACHU_777}/pedidos`, {
-    headers: {
-      Authorization: `Bearer ${getCookie("jwt_token")}`,
-    },
+  const response = await fetch(`${NICE}/pedidos`, {
+    headers: getAuthHeaders(),
   });
 
   if (!response.ok) {
@@ -363,4 +311,3 @@ export const getOrders = async () => {
 
   return await response.json();
 };
-

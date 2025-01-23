@@ -97,7 +97,6 @@ export default function AppRoutes() {
 
 // Componente para manejar la redirección condicional en "/"
 const HomeRedirectHandler = () => {
-  console.log('Renderizando HomeRedirectHandler...');
 
   const query = new URLSearchParams(window.location.search);
   const status = query.get('status');

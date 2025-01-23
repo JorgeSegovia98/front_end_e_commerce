@@ -39,7 +39,7 @@ export const PaymentSuccessHandler = () => {
     alert(result);
 
     // Redirigir a la página de pedidos
-    navigate('/MyOrdersPage');
+    navigate('/my-orders');
   };
 
   return (

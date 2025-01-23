@@ -26,7 +26,6 @@ const MyOrdersPage = () => {
         }
 
         const data = await response.json();
-        console.log('Respuesta del servidor:', data);
 
         if (!Array.isArray(data)) {
           console.error('Formato de respuesta inesperado:', data);
