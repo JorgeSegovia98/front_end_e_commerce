@@ -39,7 +39,7 @@ const MyOrdersPage = () => {
           id: order.id_pedido,
           total: order.totalDinero,
           fecha: new Date(order.fechaPedido).toLocaleDateString(),
-          productos: [], // Se deja vacío ya que no hay datos de productos
+          productos: [], 
         }));
 
         setOrders(mappedOrders);
