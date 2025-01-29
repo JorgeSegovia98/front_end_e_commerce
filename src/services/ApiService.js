@@ -114,7 +114,6 @@ export async function register(username, password, correo, direccion, telefono, 
   }
 }
 
-// Obtener productos de usuario
 export async function getUserProducts() {
   try {
     const response = await fetch(`${NICE}/productos/usuario`, {
@@ -141,7 +140,6 @@ export async function getUserProducts() {
   }
 }
 
-// Editar un producto
 export async function editProduct(productId, formData) {
   try {
     const response = await fetch(`${NICE}/productos/editar/${productId}`, {

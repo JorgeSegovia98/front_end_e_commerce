@@ -17,25 +17,47 @@ export const SellProduct = () => {
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      const validFormats = ['image/png', 'image/jpeg'];
-      const maxSize = 3 * 1024 * 1024; // 3 MB en bytes
-
-      if (!validFormats.includes(file.type)) {
-        setError('Solo se permiten imágenes en formato PNG o JPG.');
-        setImage(null);
-        return;
-      }
-
+      const maxSize = 3 * 1024 * 1024; // Tamaño máximo: 3 MB
+  
+      // Validar el tamaño del archivo
       if (file.size > maxSize) {
         setError('La imagen no debe superar los 3 MB.');
         setImage(null);
         return;
       }
-
-      setError(''); // Limpiar errores previos
-      setImage(file); // Guardar la imagen seleccionada
+  
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const arrayBuffer = event.target.result; // Obtener el contenido del archivo
+        const uint8Array = new Uint8Array(arrayBuffer); // Convertir a un arreglo de bytes
+  
+        // Firmas mágicas para PNG y JPEG
+        const pngSignature = [0x89, 0x50, 0x4e, 0x47]; // 4 primeros bytes de un archivo PNG
+        const jpegSignature = [0xff, 0xd8, 0xff]; // 3 primeros bytes de un archivo JPEG
+  
+        // Verificar si los primeros bytes coinciden con PNG o JPEG
+        const isPng = pngSignature.every((byte, index) => byte === uint8Array[index]);
+        const isJpeg = jpegSignature.every((byte, index) => byte === uint8Array[index]);
+  
+        if (isPng || isJpeg) {
+          setImage(file); // Si pasa la validación, guardar el archivo
+          setError(''); // Limpiar cualquier error previo
+        } else {
+          setError('El archivo no es una imagen válida.');
+          setImage(null); // Limpiar la imagen si no es válida
+        }
+      };
+  
+      reader.onerror = () => {
+        setError('Hubo un error al leer el archivo.');
+        setImage(null);
+      };
+  
+      // Leer los primeros 4 bytes para verificar la firma mágica
+      reader.readAsArrayBuffer(file.slice(0, 4));
     }
   };
+  
 
   // Manejo del envío del formulario
   const handleSubmit = async (e) => {
