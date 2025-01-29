@@ -293,7 +293,7 @@ export const createOrder = async (pedido) => {
 };
 
 export const getOrders = async () => {
-  const response = await fetch(`${NICE}/pedidos`, {
+  const response = await fetch(`${NICE}/pedidos/usuario`, {
     method: 'GET',
     headers: getAuthHeaders(),
   });

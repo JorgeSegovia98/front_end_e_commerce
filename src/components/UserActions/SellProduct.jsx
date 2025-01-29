@@ -5,19 +5,19 @@ import { getUserIdFromToken } from 'utils/Auth';
 import DOMPurify from 'dompurify';
 
 export const SellProduct = () => {
-  const userId = getUserIdFromToken(); // ID del usuario extraído del token JWT
+  const userId = getUserIdFromToken();
   const [productName, setProductName] = useState('');
   const [price, setPrice] = useState('');
   const [description, setDescription] = useState('');
-  const [image, setImage] = useState(null); // Imagen seleccionada
-  const [error, setError] = useState(''); // Manejo de errores
+  const [image, setImage] = useState(null);
+  const [error, setError] = useState('');
   const navigate = useNavigate();
 
   // Manejo de selección de imagen
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      const maxSize = 3 * 1024 * 1024; // Tamaño máximo: 3 MB
+      const maxSize = 3 * 1024 * 1024; 
   
       // Validar el tamaño del archivo
       if (file.size > maxSize) {
