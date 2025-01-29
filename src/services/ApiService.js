@@ -294,6 +294,7 @@ export const createOrder = async (pedido) => {
 
 export const getOrders = async () => {
   const response = await fetch(`${NICE}/pedidos`, {
+    method: 'GET',
     headers: getAuthHeaders(),
   });
 

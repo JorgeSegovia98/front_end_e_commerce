@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { getOrders } from 'services/ApiService'; // Importar la función correcta
+import { useNavigate } from 'react-router-dom'; // Manejo de navegación
+import { getOrders } from 'services/ApiService'; // Función para obtener headers de autenticación
 
 const MyOrdersPage = () => {
   const [orders, setOrders] = useState([]);
@@ -11,10 +11,10 @@ const MyOrdersPage = () => {
   useEffect(() => {
     const fetchOrders = async () => {
       try {
-        const data = await getOrders(); // Llamar a la función reutilizable
+         // Estados para manejar los pedidos, la carga y los errores
+        const data = await getOrders(); 
 
         if (!Array.isArray(data)) {
-          console.error('Formato de respuesta inesperado:', data);
           setError('Error al procesar la información de pedidos');
           setIsLoading(false);
           return;
@@ -27,8 +27,10 @@ const MyOrdersPage = () => {
           productos: [],
         }));
 
+         // Mapear los pedidos para estructurarlos correctamente
         setOrders(mappedOrders);
       } catch (error) {
+          // Mostrar un mensaje de error si ocurre algún problema al cargar los pedidos
         console.error('Error al obtener los pedidos:', error);
         setError('No se pudieron cargar los pedidos');
       } finally {
@@ -36,9 +38,10 @@ const MyOrdersPage = () => {
       }
     };
 
-    fetchOrders();
+    fetchOrders();  // Llamar a la función para obtener los pedidos al montar el componente
   }, []);
 
+   // Renderizar una pantalla de carga si los pedidos están cargando
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-100 flex items-center justify-center">
@@ -55,6 +58,7 @@ const MyOrdersPage = () => {
     );
   }
 
+  // Renderizar la lista de pedidos
   return (
     <div className="min-h-screen bg-gray-100 py-8">
       <button
