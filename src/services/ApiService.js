@@ -2,7 +2,6 @@ import { setCookie, getCookie } from "utils/Cookies";
 
 const NICE = import.meta.env.VITE_CHARIZARD_PIKACHU_777;
 
-// Función para establecer los encabezados comunes
 function getDefaultHeaders(authRequired = false) {
   const headers = {
     'Content-Type': 'application/json',
@@ -23,7 +22,6 @@ function getDefaultHeaders(authRequired = false) {
   return headers;
 }
 
-// Función para establecer el token JWT
 export async function login(username, password) {
   try {
     const response = await fetch(`${NICE}/login`, {
@@ -36,8 +34,8 @@ export async function login(username, password) {
     });
 
     if (response.status === 200) {
-      const token = await response.text(); // El token se devuelve como texto
-      setCookie("jwt_token", token); // Guardamos el token en cookies
+      const token = await response.text(); 
+      setCookie("jwt_token", token); 
       return true;
     } else {
       return false;
@@ -48,19 +46,17 @@ export async function login(username, password) {
   }
 }
 
-// Función para obtener el encabezado de autorización
 export function getAuthHeaders() {
   return getDefaultHeaders(true);
 }
 
-// Función para obtener el usuario autenticado desde el token
 export function getAuthenticatedUser() {
   const token = getCookie('jwt_token');
   if (!token) return null;
 
   try {
-    const payload = JSON.parse(atob(token.split('.')[1])); // Decodificamos el JWT
-    return payload.sub; // Supongamos que "sub" es el ID del usuario
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    return payload.sub;
   } catch (error) {
     console.error('Error al decodificar el token:', error);
     return null;
@@ -73,14 +69,14 @@ export async function changePassword(username, newPassword, securityAnswer) {
       method: 'PATCH',
       headers: getDefaultHeaders(),
       body: JSON.stringify({
-        username: username, // Nombre de usuario
-        nuevaContrasena: newPassword, // Nueva contraseña
-        preguntaSeguridad: securityAnswer, // Respuesta de seguridad
+        username: username, 
+        nuevaContrasena: newPassword, 
+        preguntaSeguridad: securityAnswer, 
       }),
     });
 
     if (response.status === 200) {
-      return true; // Contraseña actualizada correctamente
+      return true; 
     } else {
       const errorDetails = await response.text();
       console.error('Error al cambiar la contraseña:', errorDetails);
@@ -176,9 +172,9 @@ export const createProduct = async (productData) => {
         nombre: productData.nombre,
         precio: productData.precio,
         descripcion: productData.descripcion,
-        imagen: null, // Backend espera este valor explícitamente
+        imagen: null, 
         usuario: {
-          id_usuario: productData.usuario.id, // Asegúrate de enviar "id_usuario"
+          id_usuario: productData.usuario.id, 
         },
       }),
     });
@@ -189,14 +185,13 @@ export const createProduct = async (productData) => {
       throw new Error('Error al crear el producto');
     }
 
-    return await response.json(); // Devuelve el producto creado
+    return await response.json(); 
   } catch (error) {
     console.error('Error en createProduct:', error);
     throw error;
   }
 };
 
-// Ejemplo: Obtener todos los productos
 export const getAllProducts = async () => {
   try {
     const response = await fetch(`${NICE}/productos`, {
@@ -215,7 +210,6 @@ export const getAllProducts = async () => {
   }
 };
 
-// Obtener la URL de la imagen de un producto por su ID
 export async function getProductImage(productId) {
   try {
     const response = await fetch(`${NICE}/productos/imagen/${productId}`, {
