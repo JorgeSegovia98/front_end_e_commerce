@@ -62,37 +62,46 @@ export const SellProduct = () => {
   // Manejo del envío del formulario
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+    setError("");
+  
     if (!image) {
-      setError('Debe seleccionar una imagen válida antes de publicar el producto.');
+      setError("Debe seleccionar una imagen válida antes de publicar el producto.");
       return;
     }
-
-    // Sanitizar entradas para prevenir ataques XSS
+  
+    // Sanitizar entradas
     const sanitizedProductName = DOMPurify.sanitize(productName);
     const sanitizedDescription = DOMPurify.sanitize(description);
-
-    // Crear el objeto del producto
+  
+    // 🔹 Crear objeto del producto (sin `usuario`, porque el backend no lo necesita)
     const productData = {
       nombre: sanitizedProductName,
       precio: parseFloat(price),
       descripcion: sanitizedDescription,
-      usuario: { id: userId }, // Asociar el producto al usuario autenticado
     };
-
+  
     try {
-      // Crear el producto en el backend
-      const createdProduct = await createProduct(productData);
-
-      // Subir la imagen asociada
-      await uploadImage(createdProduct.id, image);
-
-      // Redirigir a la página de productos tras el éxito
-      navigate('/products-page');
+      // 🔹 Crear el producto en el backend
+      const productId = await createProduct(productData);
+  
+      if (!productId) {
+        setError("No se pudo obtener el ID del producto. Verifica la respuesta del servidor.");
+        return;
+      }
+  
+      console.log(`🔹 Producto creado con ID: ${productId}`);
+  
+      // 🔹 Subir la imagen asociada al producto
+      await uploadImage(productId, image);
+  
+      // 🔹 Redirigir a la página de productos tras el éxito
+      navigate("/products-page");
     } catch (error) {
-      setError('Hubo un error al publicar el producto. Intenta de nuevo.');
+      console.error("❌ Error al publicar el producto:", error);
+      setError("Hubo un error al publicar el producto. Intenta de nuevo.");
     }
   };
+  
 
   return (
     <div className="min-h-screen bg-gray-100">

@@ -169,31 +169,36 @@ export async function editProduct(productId, formData) {
 export const createProduct = async (productData) => {
   try {
     const response = await fetch(`${NICE}/mi-pr/productos`, {
-      method: 'POST',
+      method: "POST",
       headers: getAuthHeaders(),
-      body: JSON.stringify({
-        nombre: productData.nombre,
-        precio: productData.precio,
-        descripcion: productData.descripcion,
-        imagen: null, 
-        usuario: {
-          id_usuario: productData.usuario.id, 
-        },
-      }),
+      body: JSON.stringify(productData),
     });
 
     if (!response.ok) {
       const errorDetails = await response.text();
-      console.error('Error del servidor:', errorDetails);
-      throw new Error('Error al crear el producto');
+      console.error("❌ Error al crear el producto:", errorDetails);
+      throw new Error("Error al crear el producto");
     }
 
-    return await response.json(); 
+    console.log("✅ Producto creado correctamente.");
+
+    // ✅ Extraer el ID del producto desde la respuesta JSON
+    const jsonResponse = await response.json();
+    if (jsonResponse.id) {
+      console.log(`🔹 ID del producto recibido: ${jsonResponse.id}`);
+      return jsonResponse.id;
+    }
+
+    console.warn("⚠️ No se encontró el ID del producto en la respuesta.");
+    return null;
   } catch (error) {
-    console.error('Error en createProduct:', error);
+    console.error("❌ Error en createProduct:", error);
     throw error;
   }
 };
+
+
+
 
 export const getAllProducts = async () => {
   try {
@@ -215,7 +220,7 @@ export const getAllProducts = async () => {
 
 export async function getProductImage(productId) {
   try {
-    const response = await fetch(`${NICE}/productos/imagen/${productId}`, {
+    const response = await fetch(`${NICE}/mi-pr/productos/imagen/${productId}`, {
       method: 'GET',
       headers: getAuthHeaders(),
     });
@@ -239,33 +244,41 @@ export async function getProductImage(productId) {
 }
 
 export const uploadImage = async (productId, file) => {
+  if (!productId) {
+    console.error("❌ No se puede subir la imagen sin un productId.");
+    return;
+  }
+
   const formData = new FormData();
-  formData.append('file', file);
+  formData.append("file", file); // 🔥 Asegúrate de que "file" sea el nombre correcto
 
   try {
-    const response = await fetch(`${NICE}/productos/upload/${productId}`, {
-      method: 'POST',
+    const response = await fetch(`${NICE}/mi-pr/productos/upload/${productId}`, {
+      method: "POST",
       headers: {
-        Authorization: `Bearer ${getCookie('jwt_token')}`,
-        'Cache-Control': 'no-store',
-        'Pragma': 'no-cache',
-        'X-Content-Type-Options': 'nosniff',
+        Authorization: `Bearer ${getCookie("jwt_token")}`, // 🔥 Asegúrate de que el token es correcto
+        "Cache-Control": "no-store",
+        "Pragma": "no-cache",
+        "X-Content-Type-Options": "nosniff",
+        // ❌ No agregues 'Content-Type': 'multipart/form-data' aquí, porque fetch lo maneja automáticamente.
       },
       body: formData,
     });
 
     if (!response.ok) {
       const errorDetails = await response.text();
-      console.error('Error al subir la imagen:', errorDetails);
-      throw new Error('Error al subir la imagen');
+      console.error("❌ Error al subir la imagen:", errorDetails);
+      throw new Error("Error al subir la imagen");
     }
 
-    return await response.text();
+    console.log("✅ Imagen subida correctamente.");
+    return true;
   } catch (error) {
-    console.error('Error en uploadImage:', error);
+    console.error("❌ Error en uploadImage:", error);
     throw error;
   }
 };
+
 
 export const createPayment = async (total) => {
   const response = await fetch(
@@ -284,18 +297,28 @@ export const createPayment = async (total) => {
 };
 
 export const createOrder = async (pedido) => {
-  const response = await fetch(`${NICE}/pedidos/crear`, {
-    method: 'POST',
-    headers: getAuthHeaders(),
-    body: JSON.stringify(pedido),
-  });
+  try {
+    const response = await fetch(`${NICE}/mi-pe/pedidos/crear`, {
+      method: "POST",
+      headers: getAuthHeaders(),
+      body: JSON.stringify(pedido),
+    });
 
-  if (!response.ok) {
-    throw new Error('Error al crear el pedido');
+    const responseText = await response.text();
+    console.log("📡 Respuesta del backend:", responseText);
+
+    if (!response.ok) {
+      console.error("❌ Error en la API:", responseText);
+      throw new Error("Error al crear el pedido");
+    }
+
+    return responseText;
+  } catch (error) {
+    console.error("❌ Error en createOrder:", error);
+    throw error;
   }
-
-  return await response.text();
 };
+
 
 export const getOrders = async () => {
   const response = await fetch(`${NICE}/mi-pe/pedidos/usuario`, {

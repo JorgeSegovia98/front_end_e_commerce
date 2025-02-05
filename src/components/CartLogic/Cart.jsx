@@ -1,43 +1,43 @@
-// Cart Component
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useCart } from './CartContext';
-import { createOrder } from '../../services/ApiService.js'; // Ruta corregida
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useCart } from "./CartContext";
+import { createOrder } from "../../services/ApiService.js";
 
 export const Cart = () => {
   const navigate = useNavigate();
   const { cartItems, removeFromCart, updateQuantity, getCartTotal } = useCart();
-// Función para ir al proceso de pago
-  const goToPayment = () => {
-    const total = getCartTotal();
-    // Guardando el total del pedido en el almacenamiento local (localStorage)
-    // Nota de seguridad: Almacenar solo datos no sensibles (como el total) en localStorage.
-    // Evitar guardar información sensible del usuario, como detalles de tarjetas de crédito.
-    localStorage.setItem('totalPedido', total);
-    navigate('/payment');
-  };
+  const [error, setError] = useState("");
 
-// Si el carrito está vacío, mostramos un mensaje y un botón para seguir comprando
-  if (cartItems.length === 0) {
-    return (
-      <div className="container mx-auto px-4 py-8">
-        <h1 className="text-2xl font-bold mb-6">Tu carrito está vacío</h1>
-        <button
-          onClick={() => navigate('/products-page')}
-          className="inline-block bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 text-center"
-        >
-          Seguir comprando
-        </button>
-      </div>
-    );
-  }
+  const [successMessage, setSuccessMessage] = useState(""); // Nuevo estado para el mensaje de éxito
+
+  const goToPayment = async () => {
+    const total = getCartTotal();
+  
+    const orderData = {
+      totalDinero: total,
+      productos: cartItems.map((item) => item.id),
+    };
+  
+    console.log("📦 Enviando pedido:", orderData);
+  
+    // Intentamos crear el pedido, pero sin esperar confirmación para redirigir
+    createOrder(orderData).catch((error) => {
+      console.error("❌ Error al crear el pedido:", error);
+    });
+  
+    // 🔹 Redirigir a la página de pedidos de inmediato
+    navigate("/my-orders");
+  };
+  
+ 
 
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-2xl font-bold mb-6">Tu carrito</h1>
 
+      {error && <div className="text-red-500 mb-4">{error}</div>}
+
       <div className="flex flex-col lg:flex-row gap-8">
-        {/* Lista de productos */}
         <div className="lg:w-2/3">
           {cartItems.map((item) => (
             <div key={item.id} className="bg-white rounded-lg shadow p-6 mb-4">
@@ -75,7 +75,6 @@ export const Cart = () => {
           ))}
         </div>
 
-        {/* Resumen del pedido */}
         <div className="lg:w-1/3">
           <div className="bg-white rounded-lg shadow p-6">
             <h2 className="text-xl font-semibold mb-4">Resumen del pedido</h2>
@@ -98,7 +97,7 @@ export const Cart = () => {
               Continuar al pago
             </button>
             <button
-              onClick={() => navigate('/products-page')}
+              onClick={() => navigate("/products-page")}
               className="mt-4 w-full bg-gray-600 text-white px-6 py-2 rounded hover:bg-gray-700 text-center"
             >
               Volver a la tienda
