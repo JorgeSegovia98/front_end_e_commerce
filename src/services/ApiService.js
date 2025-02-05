@@ -60,34 +60,42 @@ export function getAuthenticatedUser() {
   }
 }
 
-export async function changePassword(username, newPassword, securityAnswer) {
+import { useNavigate } from "react-router-dom";
+
+export async function changePassword(username, newPassword, securityAnswer, navigate) {
   try {
-    const response = await fetch(`${NICE}/cambiar-contrasena`, {
+    const API_URL = "http://34.59.90.108:80/mi-sg/seguridad/cambiar-contrasena";
+
+    const response = await fetch(API_URL, {
       method: 'PATCH',
-      headers: getDefaultHeaders(),
+      headers: {
+        'Content-Type': 'application/json',
+      },
       body: JSON.stringify({
         username: username, 
-        nuevaContrasena: newPassword, 
-        preguntaSeguridad: securityAnswer, 
+        password: newPassword,  // Corrección del campo
+        preguntaSeguridad: securityAnswer,
       }),
     });
 
-    if (response.status === 200) {
-      return true; 
+    if (response.status === 200 || response.status === 201) {
+      console.log("✅ Contraseña cambiada correctamente");
+      return true; // 
     } else {
       const errorDetails = await response.text();
-      console.error('Error al cambiar la contraseña:', errorDetails);
+      console.error("❌ Error en la API:", errorDetails);
       return false;
     }
   } catch (error) {
-    console.error('Error en changePassword:', error);
+    console.error("❌ Error en changePassword:", error);
     return false;
   }
 }
 
+
 export async function register(username, password, correo, direccion, telefono, preguntaSeguridad) {
   try {
-    const response = await fetch(`${NICE}/registro`, {
+    const response = await fetch(`${NICE}/mi-sg/seguridad/registro`, {
       method: 'POST',
       headers: getDefaultHeaders(),
       body: JSON.stringify({
@@ -100,7 +108,7 @@ export async function register(username, password, correo, direccion, telefono, 
       }),
     });
 
-    if (response.status === 200) {
+    if (response.status === 200 || response.status === 201) {
       return true;
     } else {
       return false;
@@ -160,7 +168,7 @@ export async function editProduct(productId, formData) {
 
 export const createProduct = async (productData) => {
   try {
-    const response = await fetch(`${NICE}/productos`, {
+    const response = await fetch(`${NICE}/mi-pr/productos`, {
       method: 'POST',
       headers: getAuthHeaders(),
       body: JSON.stringify({
@@ -290,7 +298,7 @@ export const createOrder = async (pedido) => {
 };
 
 export const getOrders = async () => {
-  const response = await fetch(`${NICE}/pedidos/usuario`, {
+  const response = await fetch(`${NICE}/mi-pe/pedidos/usuario`, {
     method: 'GET',
     headers: getAuthHeaders(),
   });
