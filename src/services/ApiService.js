@@ -1,13 +1,10 @@
 import { setCookie, getCookie } from "utils/Cookies";
 
-const NICE = import.meta.env.VITE_CHARIZARD_PIKACHU_777;
+const NICE = 'http://34.59.90.108:80';
 
 function getDefaultHeaders(authRequired = false) {
   const headers = {
-    'Content-Type': 'application/json',
-    'Cache-Control': 'no-store',
-    'Pragma': 'no-cache',
-    'X-Content-Type-Options': 'nosniff',
+    'Content-Type': 'application/json'
   };
 
   if (authRequired) {
@@ -24,7 +21,7 @@ function getDefaultHeaders(authRequired = false) {
 
 export async function login(username, password) {
   try {
-    const response = await fetch(`${NICE}/login`, {
+    const response = await fetch(`${NICE}/mi-sg/seguridad/login`, {
       method: 'POST',
       headers: getDefaultHeaders(),
       body: JSON.stringify({
@@ -192,7 +189,7 @@ export const createProduct = async (productData) => {
 
 export const getAllProducts = async () => {
   try {
-    const response = await fetch(`${NICE}/productos`, {
+    const response = await fetch(`${NICE}/mi-pr/productos`, {
       method: 'GET',
       headers: getAuthHeaders(),
     });

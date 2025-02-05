@@ -15,7 +15,7 @@ const GroupChatPage = () => {
 
   useEffect(() => {
     // Configuración del cliente STOMP y conexión al servidor WebSocket
-    const socket = new SockJS('https://backend-ecommerse-b6anfne4gqgacyc5.canadacentral-01.azurewebsites.net/chat-websocket');
+    const socket = new SockJS('http://34.59.90.108:80/mi-ct/chat-websocket');
     const client = new Client({
       webSocketFactory: () => socket,
       onConnect: (frame) => {
